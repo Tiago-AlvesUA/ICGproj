@@ -57,7 +57,7 @@ const helper = {
         //***************************** //
         //Add spotlight (with shadows)
         //***************************** //
-        const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 0.8);
+        const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 1);
         spotLight.position.set(-15,24,0);
         sceneElements.sceneGraph.add(spotLight);
 

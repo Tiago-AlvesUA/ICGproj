@@ -21,30 +21,47 @@ requestAnimationFrame(computeFrame);
 // Create and insert in the scene graph the models of the 3D scene
 function load3DObjects(sceneGraph) {
 
-    for(let i = -10 ; i <= 10 ; i++){
-        for(let j = -10 ; j <= 10 ; j++){
+    // load a texture, set wrap mode to repeat
+    const dirt_texture = new THREE.TextureLoader().load( "textures/dirt.png" );
+    // dirt_texture.wrapS = THREE.RepeatWrapping;
+    // dirt_texture.wrapT = THREE.RepeatWrapping;
+    // dirt_texture.repeat.set( 4, 4 );
+
+    const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+
+
+
+    const simplex = new SimplexNoise();
+    const MAX_HEIGHT = 4;
+
+    for(let i = -15 ; i <= 15 ; i++){
+        for(let j = -15 ; j <= 15 ; j++){
             let position = tileToPosition(i, j);
 
             if(position.length() > 16) continue;
             
-
-            // calculate the noise value for this tile's position
-            // noise is not a function
-            const noiseValue = new SimplexNoise();
-
-            noiseValue.noise = (i * 0.1, j * 0.1);
-
-            // get random height between 1 and 5 (using the noise value)
-
-            const height = Math.floor(Math.random() * 5) + 1;
-
+            let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
+            noise = Math.pow(noise, 1.5);
+            let height = noise * MAX_HEIGHT;
+            let text;
             hexGeometry(height, position);
         }
     }
     
     function hexGeometry(height,position){
         const cylinderGeometry = new THREE.CylinderGeometry(1, 1, height, 6, 1, false);
-        const cylinderMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
+        let cylinderMaterial;
+        if (height > 10){
+            cylinderMaterial = new THREE.MeshPhongMaterial({ 
+                color: 'rgb(255,255,255)',
+                map: snow_texture,
+                emissive: new THREE.Color(0.05, 0.05, 0.05)});
+        }else{
+            cylinderMaterial = new THREE.MeshPhongMaterial({ 
+                color: 'rgb(255,255,255)',
+                map: dirt_texture,
+                emissive: new THREE.Color(0.05, 0.05, 0.05)});
+        }
         const cylinderObject = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
         cylinderObject.position.set(position.x,height*0.5,position.y);
         cylinderObject.castShadow = true;
