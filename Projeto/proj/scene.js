@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import helper from "./helper.js";
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { mergeBufferGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // To store the scene graph, and elements usefull to rendering the scene
 const sceneElements = {
@@ -16,6 +17,7 @@ const sceneElements = {
 //let hexagonGeometries = new THREE.BoxGeometry(0, 0, 0);
 let dirtGeo = new THREE.BoxGeometry(0, 0, 0);
 let snowGeo = new THREE.BoxGeometry(0, 0, 0);
+let grassGeo = new THREE.BoxGeometry(0, 0, 0);
 helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
@@ -99,12 +101,25 @@ function load3DObjects(sceneGraph) {
     character.position.set(30,0,0);
     sceneGraph.add(character);
     
-    for (let i = 0; i < 10; i++) {
-        let tree = createTree(1, new THREE.Vector3(Math.random() * 50 - 25,0,Math.random() * 50 - 25));
+    for (let i = 0; i < 50; i++) {
+        let tree = createTree(1, new THREE.Vector3(Math.random() * 100-50,0,Math.random() * 100-50));
         sceneGraph.add(tree);
     }
 
     getMountains(sceneGraph);
+
+    let cloudPositions = [];
+    for (let i = 0; i<3; i++){
+        let cloudPosition = new THREE.Vector3(Math.random() * 50-25,30,Math.random() * 50-25);
+        while (isTooClose(cloudPosition, cloudPositions)){
+            cloudPosition = new THREE.Vector3(Math.random() * 50-25,30,Math.random() * 50-25);
+        }
+        cloudPositions.push(cloudPosition);
+        let cloud = createCloud(cloudPosition);
+        sceneGraph.add(cloud);
+    }
+    
+    loadHouse(sceneGraph);
 }
 
 function getCharacter(){
@@ -161,19 +176,28 @@ function createTree(height, position){
 
     var tree = new THREE.Group();
     tree.add(logObject); tree.add(leaf); tree.add(leaf2); tree.add(leaf3);
-    tree.castShadow = true;
-    tree.receiveShadow = true;
+    // tree.castShadow = true;
+    // tree.receiveShadow = true;
 
     return tree;
 }
 
 function getMountains(sceneGraph){
-    const dirt_texture = new THREE.TextureLoader().load( "textures/dirt.png" );
     const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+    snow_texture.wrapS = THREE.RepeatWrapping;
+    snow_texture.wrapT = THREE.RepeatWrapping;
+    snow_texture.repeat.set( 7, 7 );
+    const rock_texture = new THREE.TextureLoader().load( "textures/rock.jpg" );
+    rock_texture.wrapS = THREE.RepeatWrapping;
+    rock_texture.wrapT = THREE.RepeatWrapping;
+    rock_texture.repeat.set( 6, 6 );
+    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    grass_texture.wrapS = THREE.RepeatWrapping;
+    grass_texture.wrapT = THREE.RepeatWrapping;
+    grass_texture.repeat.set( 1, 1 );
 
     const simplex = new SimplexNoise();
     const MAX_HEIGHT = 8;
-    let dirt = '';
 
     for(let i = -15 ; i <= 15 ; i++){
         for(let j = -15 ; j <= 15 ; j++){
@@ -185,26 +209,31 @@ function getMountains(sceneGraph){
                 height = noise * MAX_HEIGHT;
             }else if(position.length() > 18){
                 continue;
+            }else if(position.length() > 17){
+                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
+                noise = Math.pow(noise, 1.5);
+                height = noise * MAX_HEIGHT/7;
             }else if(position.length() > 16){
                 let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
                 noise = Math.pow(noise, 1.5);
-                height = noise * MAX_HEIGHT/2;
-                dirt = 'dirt';
+                height = noise * MAX_HEIGHT/3;
             }else if(position.length() > 14){
                 let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
                 noise = Math.pow(noise, 1.5);
+                height = noise * MAX_HEIGHT/1.5;
+            }else if(position.length() > 12){
+                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
+                noise = Math.pow(noise, 1.5);
                 height = noise * MAX_HEIGHT;
-                dirt = 'dirt';
             } 
             
-            makeHex(height, position, dirt);
-            //hexGeometry(height, position,dirt);
-            dirt = '';
+            makeHex(height, position);
         }
     }
     let snowMesh = hexMesh(snowGeo, snow_texture);
-    let dirtMesh = hexMesh(dirtGeo, dirt_texture);
-    sceneGraph.add(snowMesh, dirtMesh);
+    let dirtMesh = hexMesh(dirtGeo, rock_texture);
+    let grassMesh = hexMesh(grassGeo, grass_texture);
+    sceneGraph.add(snowMesh, dirtMesh, grassMesh);
 }
 
 function hexGeometry(height,position){
@@ -216,10 +245,12 @@ function hexGeometry(height,position){
 function makeHex(height,position){
     let geo = hexGeometry(height,position);
 
-    if(height > 22 && position.length() < 14){
+    if(height > 22 && position.length() < 13){
         snowGeo = mergeBufferGeometries([geo, snowGeo]);
-    }else{
+    }else if(height > 3 && position.length() < 17){
         dirtGeo = mergeBufferGeometries([geo, dirtGeo]);
+    }else{
+        grassGeo = mergeBufferGeometries([geo, grassGeo]);
     }
 }
 
@@ -236,6 +267,63 @@ function hexMesh(geo, texture){
     mesh.receiveShadow = true;
     return mesh;
 }
+
+function createCloud(position){
+    const puff1 = new THREE.SphereGeometry(2, 7, 7);
+    puff1.translate(position.x, position.y, position.z)
+    const puff1Material = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
+    const puff1Mesh = new THREE.Mesh(puff1, puff1Material);
+    puff1Mesh.castShadow = true;
+    puff1Mesh.receiveShadow = true;
+
+    const puff2 = new THREE.SphereGeometry(1.6, 7, 7);
+    puff2.translate(position.x-2, position.y, position.z)
+    const puff2Material = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
+    const puff2Mesh = new THREE.Mesh(puff2, puff2Material);
+    puff2Mesh.castShadow = true;
+    puff2Mesh.receiveShadow = true;
+
+    const puff3 = new THREE.SphereGeometry(1.3, 7, 7);
+    puff3.translate(position.x+2, position.y, position.z)
+    const puff3Material = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
+    const puff3Mesh = new THREE.Mesh(puff3, puff3Material);
+    puff3Mesh.castShadow = true;
+    puff3Mesh.receiveShadow = true;
+
+    var cloud = new THREE.Group();
+    cloud.add(puff1Mesh); cloud.add(puff2Mesh); cloud.add(puff3Mesh);
+
+    return cloud;
+    // var tree = new THREE.Group();
+    // tree.add(logObject); tree.add(leaf); tree.add(leaf2); tree.add(leaf3);  
+}
+
+function isTooClose(position, otherPositions){
+    for (let i = 0; i < otherPositions.length; i++) {
+        let distance = position.clone().setY(0).distanceTo(otherPositions[i].clone().setY(0));
+        if(distance < 7.5){
+            return true;
+        }
+    }
+    return false;
+}
+
+function loadHouse(sceneGraph){
+    let loader = new GLTFLoader();
+    loader.load('models/house.gltf', (gltf) => {
+        let house = gltf.scene;
+        house.traverse(child => {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        });
+        house.scale.set(1.5,1.5,1.5);
+        house.position.set(-25, 0, 20);
+        house.name = 'house';
+        house.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI);
+        sceneGraph.add(house);
+    });
+}
+
 
 var dispX = 0.1, dispZ = 0.1;
 // Displacement values
