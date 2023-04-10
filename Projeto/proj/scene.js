@@ -91,6 +91,8 @@ function load3DObjects(sceneGraph) {
     const planeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(200, 200, 200)', side: THREE.DoubleSide, map: grass_texture });
     const planeObject = new THREE.Mesh(planeGeometry, planeMaterial);
     sceneGraph.add(planeObject);
+    ///getGround(sceneGraph);
+
 
     // Change orientation of the plane using rotation
     planeObject.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
@@ -102,11 +104,19 @@ function load3DObjects(sceneGraph) {
     sceneGraph.add(character);
     
     for (let i = 0; i < 50; i++) {
-        let tree = createTree(1, new THREE.Vector3(Math.random() * 100-50,0,Math.random() * 100-50));
+        let tree = createTree(1, new THREE.Vector3(Math.random() * 100-50,0,Math.random() * 50-25));
         sceneGraph.add(tree);
     }
 
-    getMountains(sceneGraph);
+    //getRoundMountains(sceneGraph, new THREE.Vector2(0,0));
+
+    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 1);
+    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 2);
+    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 3);
+    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 4);
+
+    getRectangularMountains(sceneGraph, 1);
+    getRectangularMountains(sceneGraph, 2);
 
     let cloudPositions = [];
     for (let i = 0; i<3; i++){
@@ -119,7 +129,7 @@ function load3DObjects(sceneGraph) {
         sceneGraph.add(cloud);
     }
     
-    loadHouse(sceneGraph);
+    loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
 }
 
 function getCharacter(){
@@ -157,7 +167,7 @@ function createTree(height, position){
 
     const geo = new THREE.CylinderGeometry(0, 1.5, treeHeight, 3);
     geo.translate(position.x, treeHeight * 0.6 + treeHeight / 2, position.z);
-    const geoMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,255,0)' });
+    const geoMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(100,165,95)' });
     const leaf = new THREE.Mesh(geo, geoMaterial);
     leaf.castShadow = true;
     leaf.receiveShadow = true;
@@ -176,13 +186,31 @@ function createTree(height, position){
 
     var tree = new THREE.Group();
     tree.add(logObject); tree.add(leaf); tree.add(leaf2); tree.add(leaf3);
-    // tree.castShadow = true;
-    // tree.receiveShadow = true;
 
     return tree;
 }
 
-function getMountains(sceneGraph){
+function getGround(sceneGraph) {
+    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    grass_texture.wrapS = THREE.RepeatWrapping;
+    grass_texture.wrapT = THREE.RepeatWrapping;
+    grass_texture.repeat.set( 1, 1 );
+
+    for (let i = 0; i < 57; i++) {
+        for (let j = 0; j < 50; j++) {
+            // posição da montanha
+            let position = tileToPosition(i, j);
+            let height = 0.5;
+            makeHexRec(height,position);
+        }
+    }
+    let grassMesh = hexMesh(grassGeo, grass_texture);
+    let translation = new THREE.Matrix4().makeTranslation(0, -0.5, 0);
+    grassMesh.applyMatrix4(translation);
+    sceneGraph.add(grassMesh);
+}
+
+function getSideMountains(sceneGraph, positionToGo, side){
     const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
     snow_texture.wrapS = THREE.RepeatWrapping;
     snow_texture.wrapT = THREE.RepeatWrapping;
@@ -197,39 +225,158 @@ function getMountains(sceneGraph){
     grass_texture.repeat.set( 1, 1 );
 
     const simplex = new SimplexNoise();
-    const MAX_HEIGHT = 8;
+    const MAX_HEIGHT = 10;
+
+    for (let i = 0; i < 15; i++) {
+        for (let j = 0; j < 15; j++) {
+            // posição da montanha
+            let position = tileToPosition(i + positionToGo.x, j + positionToGo.y);
+            let distanceFromMountainCenter = Math.abs(i) + Math.abs(j);
+            let height = 0;
+            let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
+            noise = Math.pow(noise, 1.5);
+            if(distanceFromMountainCenter < 14){
+                height = noise * MAX_HEIGHT;
+            }else if(distanceFromMountainCenter > 18){
+                continue;
+            }else if(distanceFromMountainCenter > 17){
+                height = noise * MAX_HEIGHT/7;
+            }else if(distanceFromMountainCenter > 16){
+                height = noise * MAX_HEIGHT/3;
+            }else if(distanceFromMountainCenter > 14){
+                height = noise * MAX_HEIGHT/1.5;
+            }else if(distanceFromMountainCenter > 12){
+                height = noise * MAX_HEIGHT;
+            } 
+            makeHex(height,position, distanceFromMountainCenter);
+        }
+    }
+        // rotate mountain
+    if(side == 2){
+        let rotation = new THREE.Matrix4().makeRotationY(Math.PI/2);
+        snowGeo.applyMatrix4(rotation);
+        dirtGeo.applyMatrix4(rotation);
+        grassGeo.applyMatrix4(rotation);
+    }else if(side == 3){
+        let rotation = new THREE.Matrix4().makeRotationY(Math.PI);
+        snowGeo.applyMatrix4(rotation);
+        dirtGeo.applyMatrix4(rotation);
+        grassGeo.applyMatrix4(rotation);
+    }else if(side == 4){
+        let rotation = new THREE.Matrix4().makeRotationY(Math.PI*3/2);
+        snowGeo.applyMatrix4(rotation);
+        dirtGeo.applyMatrix4(rotation);
+        grassGeo.applyMatrix4(rotation);
+    }
+
+    let snowMesh = hexMesh(snowGeo, snow_texture);
+    let dirtMesh = hexMesh(dirtGeo, rock_texture);
+    let grassMesh = hexMesh(grassGeo, grass_texture);
+    sceneGraph.add(snowMesh, dirtMesh, grassMesh);
+}
+
+function getRectangularMountains(sceneGraph,side){
+    const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+    snow_texture.wrapS = THREE.RepeatWrapping;
+    snow_texture.wrapT = THREE.RepeatWrapping;
+    snow_texture.repeat.set( 7, 7 );
+    const rock_texture = new THREE.TextureLoader().load( "textures/rock.jpg" );
+    rock_texture.wrapS = THREE.RepeatWrapping;
+    rock_texture.wrapT = THREE.RepeatWrapping;
+    rock_texture.repeat.set( 6, 6 );
+    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    grass_texture.wrapS = THREE.RepeatWrapping;
+    grass_texture.wrapT = THREE.RepeatWrapping;
+    grass_texture.repeat.set( 1, 1 );
+
+    const simplex = new SimplexNoise();
+    const MAX_HEIGHT = 10;
+
+
+    for (let i = 0; i < 57; i++) {
+        for (let j = 0; j < 17; j++) {
+            // posição da montanha
+            let position = tileToPosition(i, j);
+            let height = 0;
+            let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
+            noise = Math.pow(noise, 1.5);
+            if(j < 6){
+                height = noise * MAX_HEIGHT;
+            }else if(j > 15){
+                height = noise * MAX_HEIGHT/20;
+            }else if(j > 13){
+                height = noise * MAX_HEIGHT/7;
+            }else if(j > 11){
+                height = noise * MAX_HEIGHT/3;
+            }else if(j > 8){
+                height = noise * MAX_HEIGHT/1.5;
+            }else if(j >= 6){
+                height = noise * MAX_HEIGHT/1.2;
+            }
+            makeHexRec(height,position);
+        }
+    }
+
+    let snowMesh = hexMesh(snowGeo, snow_texture);
+    let dirtMesh = hexMesh(dirtGeo, rock_texture);
+    let grassMesh = hexMesh(grassGeo, grass_texture);
+    if (side == 1){
+        let translation = new THREE.Matrix4().makeTranslation(-50, 0, -50);
+        snowMesh.applyMatrix4(translation);
+        dirtMesh.applyMatrix4(translation);
+        grassMesh.applyMatrix4(translation);
+    }else if(side == 2){
+        let rotation = new THREE.Matrix4().makeRotationY(Math.PI);
+        snowMesh.applyMatrix4(rotation);
+        dirtMesh.applyMatrix4(rotation);
+        grassMesh.applyMatrix4(rotation);
+        let translation = new THREE.Matrix4().makeTranslation(50, 0, 50);
+        snowMesh.applyMatrix4(translation);
+        dirtMesh.applyMatrix4(translation);
+        grassMesh.applyMatrix4(translation);
+    }
+    sceneGraph.add(snowMesh, dirtMesh, grassMesh);
+}
+
+function getRoundMountains(sceneGraph, positionToGo){
+    const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+    snow_texture.wrapS = THREE.RepeatWrapping;
+    snow_texture.wrapT = THREE.RepeatWrapping;
+    snow_texture.repeat.set( 7, 7 );
+    const rock_texture = new THREE.TextureLoader().load( "textures/rock.jpg" );
+    rock_texture.wrapS = THREE.RepeatWrapping;
+    rock_texture.wrapT = THREE.RepeatWrapping;
+    rock_texture.repeat.set( 6, 6 );
+    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    grass_texture.wrapS = THREE.RepeatWrapping;
+    grass_texture.wrapT = THREE.RepeatWrapping;
+    grass_texture.repeat.set( 1, 1 );
+
+    const simplex = new SimplexNoise();
+    const MAX_HEIGHT = 9;
 
     for(let i = -15 ; i <= 15 ; i++){
         for(let j = -15 ; j <= 15 ; j++){
-            let position = tileToPosition(i, j);
+            // posição da montanha
+            let position = tileToPosition(i + positionToGo.x, j + positionToGo.y);
+            let distanceFromMountainCenter = position.clone().sub(positionToGo).length();
             let height = 0;
-            if(position.length() < 14){
-                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-                noise = Math.pow(noise, 1.5);
+            let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
+            noise = Math.pow(noise, 1.5);
+            if(distanceFromMountainCenter < 12){
                 height = noise * MAX_HEIGHT;
-            }else if(position.length() > 18){
+            }else if(distanceFromMountainCenter > 18){
                 continue;
-            }else if(position.length() > 17){
-                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-                noise = Math.pow(noise, 1.5);
+            }else if(distanceFromMountainCenter > 17){
                 height = noise * MAX_HEIGHT/7;
-            }else if(position.length() > 16){
-                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-                noise = Math.pow(noise, 1.5);
+            }else if(distanceFromMountainCenter > 16){
                 height = noise * MAX_HEIGHT/3;
-            }else if(position.length() > 14){
-                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-                noise = Math.pow(noise, 1.5);
-                height = noise * MAX_HEIGHT/1.5;
-            }else if(position.length() > 12){
-                let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-                noise = Math.pow(noise, 1.5);
-                height = noise * MAX_HEIGHT;
-            } 
-            
-            makeHex(height, position);
+            }else if(distanceFromMountainCenter > 12){
+                height = noise * MAX_HEIGHT/1.5;}
+            makeHex(height, position, distanceFromMountainCenter);
         }
     }
+
     let snowMesh = hexMesh(snowGeo, snow_texture);
     let dirtMesh = hexMesh(dirtGeo, rock_texture);
     let grassMesh = hexMesh(grassGeo, grass_texture);
@@ -242,12 +389,24 @@ function hexGeometry(height,position){
     return cylinderGeometry;
 }
 
-function makeHex(height,position){
+function makeHex(height,position,distanceFromMountainCenter){
     let geo = hexGeometry(height,position);
 
-    if(height > 22 && position.length() < 13){
+    if(height > 22 && distanceFromMountainCenter < 13){
         snowGeo = mergeBufferGeometries([geo, snowGeo]);
-    }else if(height > 3 && position.length() < 17){
+    }else if(height > 3 && distanceFromMountainCenter < 17){
+        dirtGeo = mergeBufferGeometries([geo, dirtGeo]);
+    }else{
+        grassGeo = mergeBufferGeometries([geo, grassGeo]);
+    }
+}
+
+function makeHexRec(height,position,distanceFromMountainCenter){
+    let geo = hexGeometry(height,position);
+
+    if(height > 22){
+        snowGeo = mergeBufferGeometries([geo, snowGeo]);
+    }else if(height > 3){
         dirtGeo = mergeBufferGeometries([geo, dirtGeo]);
     }else{
         grassGeo = mergeBufferGeometries([geo, grassGeo]);
@@ -308,7 +467,7 @@ function isTooClose(position, otherPositions){
     return false;
 }
 
-function loadHouse(sceneGraph){
+function loadHouse(sceneGraph, position){
     let loader = new GLTFLoader();
     loader.load('models/house.gltf', (gltf) => {
         let house = gltf.scene;
@@ -317,7 +476,7 @@ function loadHouse(sceneGraph){
             child.receiveShadow = true;
         });
         house.scale.set(1.5,1.5,1.5);
-        house.position.set(-25, 0, 20);
+        house.position.set(position.x, 0, position.y);
         house.name = 'house';
         house.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI);
         sceneGraph.add(house);
