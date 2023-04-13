@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import helper from "./helper.js";
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
-import { mergeBufferGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Water } from 'three/addons/objects/Water2.js';
 
@@ -155,94 +155,83 @@ function load3DObjects(sceneGraph) {
         let cloud = createCloud(cloudPosition);
         sceneGraph.add(cloud);
     }
-    
-   
+
+    const californiaPts = [];
+
+    californiaPts.push( new THREE.Vector2( 610, 320 ) );
+    californiaPts.push( new THREE.Vector2( 450, 300 ) );
+    californiaPts.push( new THREE.Vector2( 392, 392 ) );
+    californiaPts.push( new THREE.Vector2( 266, 438 ) );
+    californiaPts.push( new THREE.Vector2( 190, 570 ) );
+    californiaPts.push( new THREE.Vector2( 190, 600 ) );
+    californiaPts.push( new THREE.Vector2( 160, 620 ) );
+    californiaPts.push( new THREE.Vector2( 160, 650 ) );
+    californiaPts.push( new THREE.Vector2( 180, 640 ) );
+    californiaPts.push( new THREE.Vector2( 165, 680 ) );
+    californiaPts.push( new THREE.Vector2( 150, 670 ) );
+    californiaPts.push( new THREE.Vector2( 90, 737 ) );
+    californiaPts.push( new THREE.Vector2( 80, 795 ) );
+    californiaPts.push( new THREE.Vector2( 50, 835 ) );
+    californiaPts.push( new THREE.Vector2( 64, 870 ) );
+    californiaPts.push( new THREE.Vector2( 60, 945 ) );
+    californiaPts.push( new THREE.Vector2( 300, 945 ) );
+    californiaPts.push( new THREE.Vector2( 300, 743 ) );
+    californiaPts.push( new THREE.Vector2( 600, 473 ) );
+    californiaPts.push( new THREE.Vector2( 626, 425 ) );
+    californiaPts.push( new THREE.Vector2( 600, 370 ) );
+    californiaPts.push( new THREE.Vector2( 610, 320 ) );
+
+    for ( let i = 0; i < californiaPts.length; i ++ ) californiaPts[ i ].multiplyScalar( 0.25 );
+
+    const californiaShape = new THREE.Shape( californiaPts );
+
+    let geometry2 = new THREE.ShapeGeometry( californiaShape );
+
+    let mesh = new THREE.Mesh( geometry2, new THREE.MeshPhongMaterial( { side: THREE.DoubleSide,  color: 0xf08000 } ) );
+    mesh.position.set( 0, 0, 0 );
+    mesh.rotation.set( 0, 0, 0 );
+    mesh.scale.set( 1, 1, 1 );
+    sceneGraph.add( mesh );
 
 
-    const closedSpline = new THREE.CatmullRomCurve3( [
-        new THREE.Vector3( - 60, - 100, 60 ),
-        new THREE.Vector3( - 60, 20, 60 ),
-        new THREE.Vector3( - 60, 120, 60 ),
-        new THREE.Vector3( 60, 20, - 60 ),
-        new THREE.Vector3( 60, - 100, - 60 )
-    ] );
 
-    closedSpline.curveType = 'catmullrom';
-    closedSpline.closed = true;
 
-    const extrudeSettings1 = {
-        steps: 100,
-        bevelEnabled: false,
-        extrudePath: closedSpline
-    };
+    const riverShape = new THREE.Shape();
+    riverShape.moveTo(-50, -10);
+    // rectangle but the length lines are curved
+    riverShape.lineTo(-50, 10);
+    riverShape.bezierCurveTo(-50, 10, 0, 12.5, 50, 10);
+    riverShape.lineTo(50, -10);
+    riverShape.bezierCurveTo(50, -10, 0, -12.5, -50, -10);
 
-    const pts1 = [], count = 3;
+    //riverShape.bezierCurveTo(-50, 10, 50, 12.5, 100, 10);
+    //riverShape.lineTo(10, 0);
+    //riverShape.bezierCurveTo(10, 0, 50, -2.5, 0, 0);
+    //riverShape.bezierCurveTo
+    // riverShape.lineTo(0, 10);
+    // riverShape.bezierCurveTo(0, 10, 0, 0, 10, 0);
 
-    for ( let i = 0; i < count; i ++ ) {
 
-        const l = 20;
-
-        const a = 2 * i / count * Math.PI;
-
-        pts1.push( new THREE.Vector2( Math.cos( a ) * l, Math.sin( a ) * l ) );
-
-    }
-
-    const shape1 = new THREE.Shape( pts1 );
-
-    const geometry1 = new THREE.ExtrudeGeometry( shape1, extrudeSettings1 );
-
-    const material1 = new THREE.MeshLambertMaterial( { color: 0xb00000, wireframe: false } );
-
-    const mesh1 = new THREE.Mesh( geometry1, material1 );
-
-    sceneGraph.add( mesh1 );
-
-    const waterGeometry = new THREE.PlaneGeometry( 100, 20 );
-
-    // const riverForm = new THREE.CatmullRomCurve3( [
-    //     new THREE.Vector3(-50, 0, 50),
-    //     new THREE.Vector3(50, 0, 50),
-    //     new THREE.Vector3(-50, 0, -50)
-    // ] );
-
+    const riverGeometry = new THREE.ShapeGeometry(riverShape);
     const water = new Water(
-        waterGeometry,
+        riverGeometry,
         {
             textureWidth: 512,
             textureHeight: 512,
-            waterNormals: new THREE.TextureLoader().load( 'textures/waternormals.jpg', function ( texture ) {
-
-                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
-            } ),
+            waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture) {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
             sunDirection: new THREE.Vector3(),
             sunColor: 0xffffff,
             waterColor: 0x001e0f,
             distortionScale: 3.7,
-            fog: sceneGraph.fog !== undefined
+            fog: sceneGraph.fog !== undefined,
         }
     );
-
-    water.rotation.x = - Math.PI / 2;
+    water.rotation.x = -Math.PI / 2;
     water.position.y = 0.01;
 
-    // Add the following code to modify the water's geometry based on the curve
-    // const vertices = water.geometry.vertices;
-    // const curvePoints = riverForm.getPoints(100); // get 100 points along the curve
-
-    // for (let i = 0; i < vertices.length; i++) {
-    //     const x = vertices[i].x;
-    //     const z = vertices[i].z;
-    //     const pointOnCurve = curvePoints.find(p => p.x === x && p.z === z);
-    //     if (pointOnCurve) {
-    //         vertices[i].y = pointOnCurve.y;
-    //     }
-    // }
-
-    // water.geometry.verticesNeedUpdate = true;
-
-    sceneGraph.add( water );
+    sceneGraph.add(water);
 
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
 }
@@ -510,11 +499,11 @@ function makeHex(height,position,distanceFromMountainCenter){
     let geo = hexGeometry(height,position);
 
     if(height > 22 && distanceFromMountainCenter < 13){
-        snowGeo = mergeBufferGeometries([geo, snowGeo]);
+        snowGeo = mergeGeometries([geo, snowGeo]);
     }else if(height > 3 && distanceFromMountainCenter < 17){
-        dirtGeo = mergeBufferGeometries([geo, dirtGeo]);
+        dirtGeo = mergeGeometries([geo, dirtGeo]);
     }else{
-        grassGeo = mergeBufferGeometries([geo, grassGeo]);
+        grassGeo = mergeGeometries([geo, grassGeo]);
     }
 }
 
@@ -522,11 +511,11 @@ function makeHexRec(height,position,distanceFromMountainCenter){
     let geo = hexGeometry(height,position);
 
     if(height > 22){
-        snowGeo = mergeBufferGeometries([geo, snowGeo]);
+        snowGeo = mergeGeometries([geo, snowGeo]);
     }else if(height > 3){
-        dirtGeo = mergeBufferGeometries([geo, dirtGeo]);
+        dirtGeo = mergeGeometries([geo, dirtGeo]);
     }else{
-        grassGeo = mergeBufferGeometries([geo, grassGeo]);
+        grassGeo = mergeGeometries([geo, grassGeo]);
     }
 }
 
