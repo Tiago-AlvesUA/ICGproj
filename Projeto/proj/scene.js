@@ -5,19 +5,29 @@ import helper from "./helper.js";
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { mergeBufferGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Water } from 'three/addons/objects/Water2.js';
 
 // To store the scene graph, and elements usefull to rendering the scene
 const sceneElements = {
     sceneGraph: null,
     camera: null,
     control: null,  
-    renderer: null,
+    renderer: null
 };
 
 //let hexagonGeometries = new THREE.BoxGeometry(0, 0, 0);
 let dirtGeo = new THREE.BoxGeometry(0, 0, 0);
 let snowGeo = new THREE.BoxGeometry(0, 0, 0);
 let grassGeo = new THREE.BoxGeometry(0, 0, 0);
+
+let water;
+const params = {
+    color: '#ffffff',
+    scale: 4,
+    flowX: 1,
+    flowY: 1
+};
+
 helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
@@ -87,17 +97,33 @@ function load3DObjects(sceneGraph) {
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 50, 50 );
 
-    const planeGeometry = new THREE.PlaneGeometry(100, 100);
-    const planeMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(200, 200, 200)', side: THREE.DoubleSide, map: grass_texture });
-    const planeObject = new THREE.Mesh(planeGeometry, planeMaterial);
-    sceneGraph.add(planeObject);
-    ///getGround(sceneGraph);
+    const planeGeometry1 = new THREE.PlaneGeometry(100, 40);
+    const planeMaterial1 = new THREE.MeshPhongMaterial({ color: 'rgb(200, 200, 200)', side: THREE.DoubleSide, map: grass_texture });
+    const planeObject1 = new THREE.Mesh(planeGeometry1, planeMaterial1);
+    planeObject1.position.set(0, 0, 30);
+    sceneGraph.add(planeObject1);
+
+    const planeGeometry2 = new THREE.PlaneGeometry(100, 40);
+    const planeMaterial2 = new THREE.MeshPhongMaterial({ color: 'rgb(200, 200, 200)', side: THREE.DoubleSide, map: grass_texture });
+    const planeObject2 = new THREE.Mesh(planeGeometry2, planeMaterial2);
+    planeObject2.position.set(0, 0, -30);
+    sceneGraph.add(planeObject2);
+
+    const planeGeometry3 = new THREE.PlaneGeometry(100, 20);
+    const planeMaterial3 = new THREE.MeshPhongMaterial({ color: 'rgb(235, 255, 255)', side: THREE.DoubleSide});
+    const planeObject3 = new THREE.Mesh(planeGeometry3, planeMaterial3);
+    planeObject3.position.set(0, 0, 0);
+    sceneGraph.add(planeObject3);
+    //getGround(sceneGraph);
 
 
     // Change orientation of the plane using rotation
-    planeObject.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+    planeObject1.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+    planeObject2.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+    planeObject3.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
     // Set shadow property
-    planeObject.receiveShadow = true;
+    planeObject1.receiveShadow = true;
+    planeObject2.receiveShadow = true;
 
     const character = getCharacter();
     character.position.set(30,0,0);
@@ -115,6 +141,7 @@ function load3DObjects(sceneGraph) {
     // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 3);
     // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 4);
 
+    //getRectangularMountains(sceneGraph, 1);
     getRectangularMountains(sceneGraph, 1);
     getRectangularMountains(sceneGraph, 2);
 
@@ -129,6 +156,94 @@ function load3DObjects(sceneGraph) {
         sceneGraph.add(cloud);
     }
     
+   
+
+
+    const closedSpline = new THREE.CatmullRomCurve3( [
+        new THREE.Vector3( - 60, - 100, 60 ),
+        new THREE.Vector3( - 60, 20, 60 ),
+        new THREE.Vector3( - 60, 120, 60 ),
+        new THREE.Vector3( 60, 20, - 60 ),
+        new THREE.Vector3( 60, - 100, - 60 )
+    ] );
+
+    closedSpline.curveType = 'catmullrom';
+    closedSpline.closed = true;
+
+    const extrudeSettings1 = {
+        steps: 100,
+        bevelEnabled: false,
+        extrudePath: closedSpline
+    };
+
+    const pts1 = [], count = 3;
+
+    for ( let i = 0; i < count; i ++ ) {
+
+        const l = 20;
+
+        const a = 2 * i / count * Math.PI;
+
+        pts1.push( new THREE.Vector2( Math.cos( a ) * l, Math.sin( a ) * l ) );
+
+    }
+
+    const shape1 = new THREE.Shape( pts1 );
+
+    const geometry1 = new THREE.ExtrudeGeometry( shape1, extrudeSettings1 );
+
+    const material1 = new THREE.MeshLambertMaterial( { color: 0xb00000, wireframe: false } );
+
+    const mesh1 = new THREE.Mesh( geometry1, material1 );
+
+    sceneGraph.add( mesh1 );
+
+    const waterGeometry = new THREE.PlaneGeometry( 100, 20 );
+
+    // const riverForm = new THREE.CatmullRomCurve3( [
+    //     new THREE.Vector3(-50, 0, 50),
+    //     new THREE.Vector3(50, 0, 50),
+    //     new THREE.Vector3(-50, 0, -50)
+    // ] );
+
+    const water = new Water(
+        waterGeometry,
+        {
+            textureWidth: 512,
+            textureHeight: 512,
+            waterNormals: new THREE.TextureLoader().load( 'textures/waternormals.jpg', function ( texture ) {
+
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+            } ),
+            sunDirection: new THREE.Vector3(),
+            sunColor: 0xffffff,
+            waterColor: 0x001e0f,
+            distortionScale: 3.7,
+            fog: sceneGraph.fog !== undefined
+        }
+    );
+
+    water.rotation.x = - Math.PI / 2;
+    water.position.y = 0.01;
+
+    // Add the following code to modify the water's geometry based on the curve
+    // const vertices = water.geometry.vertices;
+    // const curvePoints = riverForm.getPoints(100); // get 100 points along the curve
+
+    // for (let i = 0; i < vertices.length; i++) {
+    //     const x = vertices[i].x;
+    //     const z = vertices[i].z;
+    //     const pointOnCurve = curvePoints.find(p => p.x === x && p.z === z);
+    //     if (pointOnCurve) {
+    //         vertices[i].y = pointOnCurve.y;
+    //     }
+    // }
+
+    // water.geometry.verticesNeedUpdate = true;
+
+    sceneGraph.add( water );
+
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
 }
 
@@ -252,6 +367,7 @@ function getSideMountains(sceneGraph, positionToGo, side){
         }
     }
         // rotate mountain
+    // when doing rotations, mesh is duplicated, idk why
     if(side == 2){
         let rotation = new THREE.Matrix4().makeRotationY(Math.PI/2);
         snowGeo.applyMatrix4(rotation);
@@ -337,6 +453,7 @@ function getRectangularMountains(sceneGraph,side){
     }
     sceneGraph.add(snowMesh, dirtMesh, grassMesh);
 }
+
 
 function getRoundMountains(sceneGraph, positionToGo){
     const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
