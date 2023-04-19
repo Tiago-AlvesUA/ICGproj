@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title> 3D scene </title>
+
+	<link rel="stylesheet" href="./Projeto/proj/style.css">
+
+	<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+	<!--<script type="text/javascript" src="http://threejs.org/build/three.js" defer>   "three/addons/math/": "https://unpkg.com/three@v0.149.0/examples/jsm/math",  </script>-->
+
+	<script type="importmap">
+		{
+		  "imports": {
+				"three": "https://threejs.org/build/three.module.js",
+				"three/addons/": "https://threejs.org/examples/jsm/"
+		  }
+		}
+	</script>
+	<!--<script type="importmap">
+		{
+		  "imports": {
+			"three": "https://unpkg.com/three@v0.149.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@v0.149.0/examples/jsm/"
+		  }
+		}
+	</script>-->
+
+
+	<script type="module" src="./Projeto/proj/helper.js" defer></script>
+	<script type="module" src="./Projeto/proj/scene.js" defer></script>
+
+	
+</head>
+
+<body>
+	<div id="Tag3DScene"> </div>
+</body>
+
+</html>

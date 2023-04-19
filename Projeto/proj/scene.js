@@ -94,7 +94,7 @@ function onDocumentKeyUp(event) {
 function load3DObjects(sceneGraph) {
 
     // Create a ground plane
-    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
     grass_texture.wrapS = THREE.RepeatWrapping;
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 50, 50 );
@@ -378,7 +378,7 @@ function getWater(sceneGraph){
         {
             textureWidth: 512,
             textureHeight: 512,
-            waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture) {
+            waterNormals: new THREE.TextureLoader().load('./textures/waternormals.jpg', function (texture) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
             }),
             sunDirection: new THREE.Vector3(),
@@ -430,7 +430,7 @@ function createTree(height, position){
 }
 
 function getGround(sceneGraph) {
-    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
     grass_texture.wrapS = THREE.RepeatWrapping;
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 1, 1 );
@@ -450,15 +450,15 @@ function getGround(sceneGraph) {
 }
 
 function getSideMountains(sceneGraph, positionToGo, side){
-    const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+    const snow_texture = new THREE.TextureLoader().load( "./textures/snow.jpg" );
     snow_texture.wrapS = THREE.RepeatWrapping;
     snow_texture.wrapT = THREE.RepeatWrapping;
     snow_texture.repeat.set( 7, 7 );
-    const rock_texture = new THREE.TextureLoader().load( "textures/rock.jpg" );
+    const rock_texture = new THREE.TextureLoader().load( "./textures/rock.jpg" );
     rock_texture.wrapS = THREE.RepeatWrapping;
     rock_texture.wrapT = THREE.RepeatWrapping;
     rock_texture.repeat.set( 6, 6 );
-    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
     grass_texture.wrapS = THREE.RepeatWrapping;
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 1, 1 );
@@ -516,15 +516,15 @@ function getSideMountains(sceneGraph, positionToGo, side){
 }
 
 function getRectangularMountains(sceneGraph,side){
-    const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+    const snow_texture = new THREE.TextureLoader().load( "./textures/snow.jpg" );
     snow_texture.wrapS = THREE.RepeatWrapping;
     snow_texture.wrapT = THREE.RepeatWrapping;
     snow_texture.repeat.set( 7, 7 );
-    const rock_texture = new THREE.TextureLoader().load( "textures/rock.jpg" );
+    const rock_texture = new THREE.TextureLoader().load( "./textures/rock.jpg" );
     rock_texture.wrapS = THREE.RepeatWrapping;
     rock_texture.wrapT = THREE.RepeatWrapping;
     rock_texture.repeat.set( 6, 6 );
-    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
     grass_texture.wrapS = THREE.RepeatWrapping;
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 1, 1 );
@@ -580,15 +580,15 @@ function getRectangularMountains(sceneGraph,side){
 
 
 function getRoundMountains(sceneGraph, positionToGo){
-    const snow_texture = new THREE.TextureLoader().load( "textures/snow.jpg" );
+    const snow_texture = new THREE.TextureLoader().load( "./textures/snow.jpg" );
     snow_texture.wrapS = THREE.RepeatWrapping;
     snow_texture.wrapT = THREE.RepeatWrapping;
     snow_texture.repeat.set( 7, 7 );
-    const rock_texture = new THREE.TextureLoader().load( "textures/rock.jpg" );
+    const rock_texture = new THREE.TextureLoader().load( "./textures/rock.jpg" );
     rock_texture.wrapS = THREE.RepeatWrapping;
     rock_texture.wrapT = THREE.RepeatWrapping;
     rock_texture.repeat.set( 6, 6 );
-    const grass_texture = new THREE.TextureLoader().load( "textures/grass.jpg" );
+    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
     grass_texture.wrapS = THREE.RepeatWrapping;
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 1, 1 );
@@ -708,7 +708,7 @@ function isTooClose(position, otherPositions){
 
 function loadCampfire(sceneGraph, position){
     let loader = new GLTFLoader();
-    loader.load('models/Campfire.glb', (gltf) => {
+    loader.load('./Projeto/proj/models/Campfire.glb', (gltf) => {
         let campfire = gltf.scene;
         campfire.traverse(child => {
             child.castShadow = true;
@@ -724,7 +724,7 @@ function loadCampfire(sceneGraph, position){
 
 function loadHouse(sceneGraph, position){
     let loader = new GLTFLoader();
-    loader.load('models/house.gltf', (gltf) => {
+    loader.load('./Projeto/proj/models/house.gltf', (gltf) => {
         let house = gltf.scene;
         house.traverse(child => {
             child.castShadow = true;
