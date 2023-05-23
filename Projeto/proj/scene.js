@@ -30,6 +30,7 @@ const params = {
     flowY: 10
 };
 
+let isDay = true;
 helper.initEmptyScene(sceneElements);
 helper.setupDayTime(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
@@ -184,16 +185,6 @@ function load3DObjects(sceneGraph) {
     let cloud5 = createCloud(new THREE.Vector3(-20,35,10));
     sceneGraph.add(cloud5);
     cloud5.name = "cloud5";
-    // let cloudPositions = [];
-    // for (let i = 0; i<3; i++){
-    //     let cloudPosition = new THREE.Vector3(Math.random() * 50-25,30,Math.random() * 50-25);
-    //     while (isTooClose(cloudPosition, cloudPositions)){
-    //         cloudPosition = new THREE.Vector3(Math.random() * 50-25,30,Math.random() * 50-25);
-    //     }
-    //     cloudPositions.push(cloudPosition);
-    //     let cloud = createCloud(cloudPosition);
-    //     sceneGraph.add(cloud);
-    // }
 
     getWater(sceneGraph);
 
@@ -207,34 +198,21 @@ function load3DObjects(sceneGraph) {
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
 
     const gui = new GUI();
-    
+  
     const controls = {
-        'x': 0,
-        'y': 0,
-        'z': 0,
-        'rotation': 0,
-        'change': () => {
-            character.position.x = controls.x;
-            character.position.y = controls.y;
-            character.position.z = controls.z;
-            character.rotation.y = controls.rotation;
-        },
-        // switch between day and night
         'day': true,
         'change': () => {
             if (controls.day){
+                isDay = true;
                 helper.setupDayTime(sceneElements);
         //         sceneGraph.getObjectByName("sun").visible = true;
         //         sceneGraph.getObjectByName("moon").visible = false;
             }else{
+                isDay = false;
                 helper.setupNightTime(sceneElements);
             }
         },
     };
-    gui.add(controls, 'x', -50, 50).onChange(controls.change);
-    gui.add(controls, 'y', 0, 50).onChange(controls.change);
-    gui.add(controls, 'z', -50, 50).onChange(controls.change);
-    gui.add(controls, 'rotation', 0, 2*Math.PI).onChange(controls.change);
     gui.add(controls, 'day', true, false).onChange(controls.change);
 
 }
@@ -584,21 +562,21 @@ function hexMesh(geo, texture){
 
 function createCloud(position){
     const puff1 = new THREE.SphereGeometry(2, 7, 7);
-    puff1.translate(position.x, position.y, position.z)
+    puff1.translate(0 , 0, 0)
     const puff1Material = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
     const puff1Mesh = new THREE.Mesh(puff1, puff1Material);
     puff1Mesh.castShadow = true;
     puff1Mesh.receiveShadow = true;
 
     const puff2 = new THREE.SphereGeometry(1.6, 7, 7);
-    puff2.translate(position.x-2, position.y, position.z)
+    puff2.translate(-2, 0, 0)
     const puff2Material = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
     const puff2Mesh = new THREE.Mesh(puff2, puff2Material);
     puff2Mesh.castShadow = true;
     puff2Mesh.receiveShadow = true;
 
     const puff3 = new THREE.SphereGeometry(1.3, 7, 7);
-    puff3.translate(position.x+2, position.y, position.z)
+    puff3.translate(2, 0, 0)
     const puff3Material = new THREE.MeshPhongMaterial({ color: 'rgb(255,255,255)' });
     const puff3Mesh = new THREE.Mesh(puff3, puff3Material);
     puff3Mesh.castShadow = true;
@@ -606,6 +584,10 @@ function createCloud(position){
 
     var cloud = new THREE.Group();
     cloud.add(puff1Mesh); cloud.add(puff2Mesh); cloud.add(puff3Mesh);
+    cloud.translateY(position.y);
+    cloud.translateX(position.x);
+    cloud.translateZ(position.z);
+
 
     return cloud;
 }
@@ -812,6 +794,58 @@ function computeFrame(time) {
     }
 
     var cloud1 = sceneElements.sceneGraph.getObjectByName("cloud1");
+    var cloud2 = sceneElements.sceneGraph.getObjectByName("cloud2");
+    var cloud3 = sceneElements.sceneGraph.getObjectByName("cloud3");
+    var cloud4 = sceneElements.sceneGraph.getObjectByName("cloud4");
+    var cloud5 = sceneElements.sceneGraph.getObjectByName("cloud5");
+
+    // if is night scale down until 0
+    if (!isDay){
+        if (cloud1.scale.x > 0 && cloud2.scale.x && cloud3.scale.x && cloud4.scale.x && cloud5.scale.x) {
+            cloud1.scale.x -= 0.004;
+            cloud1.scale.y -= 0.004;
+            cloud1.scale.z -= 0.004;
+            
+            cloud2.scale.x -= 0.004;
+            cloud2.scale.y -= 0.004;
+            cloud2.scale.z -= 0.004;
+
+            cloud3.scale.x -= 0.004;
+            cloud3.scale.y -= 0.004;
+            cloud3.scale.z -= 0.004;
+
+            cloud4.scale.x -= 0.004;
+            cloud4.scale.y -= 0.004;
+            cloud4.scale.z -= 0.004;
+
+            cloud5.scale.x -= 0.004;
+            cloud5.scale.y -= 0.004;
+            cloud5.scale.z -= 0.004;
+        }
+    }else{
+        if (cloud1.scale.x < 1) {
+            cloud1.scale.x += 0.004;
+            cloud1.scale.y += 0.004;
+            cloud1.scale.z += 0.004;
+            
+            cloud2.scale.x += 0.004;
+            cloud2.scale.y += 0.004;
+            cloud2.scale.z += 0.004;
+
+            cloud3.scale.x += 0.004;
+            cloud3.scale.y += 0.004;
+            cloud3.scale.z += 0.004;
+
+            cloud4.scale.x += 0.004;
+            cloud4.scale.y += 0.004;
+            cloud4.scale.z += 0.004;
+
+            cloud5.scale.x += 0.004;
+            cloud5.scale.y += 0.004;
+            cloud5.scale.z += 0.004;
+        }
+    }
+
     // make cloud1 go back and forth
     if (cloud1.position.x < 35) {
         cloud1.position.x += 0.024;
@@ -819,32 +853,24 @@ function computeFrame(time) {
         cloud1.position.x = -45;
     }
 
-    var cloud2 = sceneElements.sceneGraph.getObjectByName("cloud2");
-    // make cloud1 go back and forth
     if (cloud2.position.x < 35) {
         cloud2.position.x += 0.022;
     }else{
         cloud2.position.x = -49;
     }
 
-    var cloud3 = sceneElements.sceneGraph.getObjectByName("cloud3");
-    // make cloud1 go back and forth
     if (cloud3.position.x < 35) {
         cloud3.position.x += 0.015;
     }else{
         cloud3.position.x = -59;
     }
 
-    var cloud4 = sceneElements.sceneGraph.getObjectByName("cloud4");
-    // make cloud1 go back and forth
     if (cloud4.position.x < 35) {
         cloud4.position.x += 0.01;
     }else{
         cloud4.position.x = -35;
     }
 
-    var cloud5 = sceneElements.sceneGraph.getObjectByName("cloud5");
-    // make cloud1 go back and forth
     if (cloud5.position.x < 35) {
         cloud5.position.x += 0.02;
     }else{

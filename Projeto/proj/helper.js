@@ -125,12 +125,13 @@ const helper = {
         sceneElements.sceneGraph.background = new THREE.Color(0x000033);
 
         // Set up night lights
-        // const ambientLightNight = new THREE.AmbientLight('rgb(10, 10, 50)', 0.2);
-        // ambientLightNight.name = "nightlight1";
-        // sceneElements.sceneGraph.add(ambientLightNight);
+        const ambientLightNight = new THREE.AmbientLight('rgb(10, 10, 50)', 0.5);
+        ambientLightNight.name = "nightlight1";
+        sceneElements.sceneGraph.add(ambientLightNight);
 
-        const spotLightNight = new THREE.SpotLight('rgb(255, 255, 255)', 0.02);
-        spotLightNight.position.set(-50, 100, 20);
+        const spotLightNight = new THREE.SpotLight('rgb(255, 255, 255)', 0.06);
+        //spotLightNight.position.set(-50, 100, 20);
+        spotLightNight.position.set(0, 100, 0);
         spotLightNight.name = "nightlight2";
         sceneElements.sceneGraph.add(spotLightNight);
     },
