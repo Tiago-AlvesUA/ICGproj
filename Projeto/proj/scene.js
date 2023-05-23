@@ -43,7 +43,7 @@ requestAnimationFrame(computeFrame);
 window.addEventListener('resize', resizeWindow);
 
 //To keep track of the keyboard - WASD
-var keyD = false, keyA = false, keyS = false, keyW = false;
+var keyD = false, keyA = false, keyS = false, keyW = false, keyN = false, keyB = false, keyC = false;
 document.addEventListener('keydown', onDocumentKeyDown, false);
 document.addEventListener('keyup', onDocumentKeyUp, false);
 
@@ -72,6 +72,15 @@ function onDocumentKeyDown(event) {
         case 87: //w
             keyW = true;
             break;
+        case 78: //n
+            keyN = true;
+            break;
+        case 66: //b
+            keyB = true;
+            break;
+        case 67: //c
+            keyC = true;
+            break;
     }
 }
 function onDocumentKeyUp(event) {
@@ -87,6 +96,15 @@ function onDocumentKeyUp(event) {
             break;
         case 87: //w
             keyW = false;
+            break;
+        case 78:
+            keyN = false;
+            break;
+        case 66:
+            keyB = false;
+            break;
+        case 67:
+            keyC = false;
             break;
     }
 }
@@ -106,12 +124,6 @@ function load3DObjects(sceneGraph) {
     const planeObject1 = new THREE.Mesh(planeGeometry1, planeMaterial1);
     planeObject1.position.set(0, -0.02, 0);
     sceneGraph.add(planeObject1);
-
-    // const planeGeometry2 = new THREE.PlaneGeometry(100, 40);
-    // const planeMaterial2 = new THREE.MeshPhongMaterial({ color: 'rgb(200, 200, 200)', side: THREE.DoubleSide, map: grass_texture });
-    // const planeObject2 = new THREE.Mesh(planeGeometry2, planeMaterial2);
-    // planeObject2.position.set(0, 0, -30);
-    // sceneGraph.add(planeObject2);
 
     const planeGeometry3 = new THREE.PlaneGeometry(100, 20);
     // const planeShape3 = new THREE.Shape();
@@ -197,25 +209,106 @@ function load3DObjects(sceneGraph) {
 
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
 
-    const gui = new GUI();
-  
-    const controls = {
-        'day': true,
-        'change': () => {
-            if (controls.day){
-                isDay = true;
-                helper.setupDayTime(sceneElements);
-        //         sceneGraph.getObjectByName("sun").visible = true;
-        //         sceneGraph.getObjectByName("moon").visible = false;
-            }else{
-                isDay = false;
-                helper.setupNightTime(sceneElements);
-            }
-        },
-    };
-    gui.add(controls, 'day', true, false).onChange(controls.change);
+    getSun(sceneGraph, new THREE.Vector3(-100, 60, -20));
+    getMoon(sceneGraph, new THREE.Vector3(-100, 60, -20));
 
+    // const gui = new GUI();
+
+    // const controls = {
+    //     'day': true,
+    //     'change': () => {
+    //         if (controls.day){
+    //             isDay = true;
+    //             helper.setupDayTime(sceneElements);
+    //             // remove stars
+    //             sceneGraph.remove(sceneGraph.getObjectByName("starField"));     
+    //         }else{
+    //             isDay = false;
+    //             helper.setupNightTime(sceneElements);
+    //             // add stars
+    //             const starsGeometry = new THREE.BufferGeometry();
+    //             const starsPosition = [];
+
+    //             for (let i = 0; i < 10000; i++) {
+    //                 const star = new THREE.Vector3();
+    //                 star.x = getRandomPosition(-1000, 1000);
+    //                 star.y = getRandomPosition(-1000, 1000);
+    //                 star.z = getRandomPosition(-1000, 1000);
+                  
+    //                 if (
+    //                     star.x < -60 || star.x > 60 ||
+    //                     star.y < -10 || star.y > 70 ||
+    //                     star.z < -60 || star.z > 60
+    //                   ) {
+    //                     starsPosition.push(star.x, star.y, star.z);
+    //                   }
+                    
+    //               }
+                  
+    //               starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsPosition, 3));
+    //               const starsMaterial = new THREE.PointsMaterial({ color: 0x888888 });
+    //               const starField = new THREE.Points(starsGeometry, starsMaterial);
+    //               starField.name = "starField";
+    //               sceneGraph.add(starField);
+    //         }
+    //     },
+    // };
+
+    // const dayNightFolder = gui.addFolder("Options");
+    // dayNightFolder.add(controls, "day").name("Toggle Day").onChange(controls.change);
+    
+    // add stars
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsPosition = [];
+
+    for (let i = 0; i < 10000; i++) {
+        const star = new THREE.Vector3();
+        star.x = getRandomPosition(-1000, 1000);
+        star.y = getRandomPosition(-1000, 1000);
+        star.z = getRandomPosition(-1000, 1000);
+      
+        if (
+            star.x < -60 || star.x > 60 ||
+            star.y < -10 || star.y > 70 ||
+            star.z < -60 || star.z > 60
+          ) {
+            starsPosition.push(star.x, star.y, star.z);
+          }
+      }
+      
+      starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsPosition, 3));
+      const starsMaterial = new THREE.PointsMaterial({ color: 0x888888 });
+      const starField = new THREE.Points(starsGeometry, starsMaterial);
+      starField.name = "starField";
+      sceneGraph.add(starField);
 }
+
+function getRandomPosition(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+// getSun(sceneGraph, new THREE.Vector3(-100, 60, -20));
+function getSun(sceneGraph, position){
+    const texture = new THREE.TextureLoader().load( "textures/sun.jpg" )
+    const geometry = new THREE.SphereGeometry(15, 50, 50);
+    const SunMaterial = new THREE.MeshBasicMaterial( { map: texture , color: 0xffcc66});
+    const sun = new THREE.Mesh( geometry, SunMaterial );
+    sun.position.set(position.x, position.y, position.z);
+    sun.name = "sun";
+  
+    sceneGraph.add(sun);
+  }
+
+function getMoon(sceneGraph, position){
+    const texture = new THREE.TextureLoader().load( "textures/moon.jpg" )
+    const geometry = new THREE.SphereGeometry(8, 50, 50 );
+    const MoonMaterial = new THREE.MeshBasicMaterial( { map: texture , color: 0xe6e6e6});
+    const moon = new THREE.Mesh( geometry, MoonMaterial );
+    moon.position.set(position.x, position.y, position.z);
+    moon.name = "moon";
+    moon.scale.set(0,0,0);
+    sceneGraph.add(moon);
+  }
 
 function getCharacter(){
     const body = new THREE.BoxGeometry(1, 1, 1);
@@ -309,36 +402,9 @@ function getTent(sceneGraph){
 }
 
 function getSmoke(sceneGraph){
-    // create 4 logs, rotating each one 45 degrees. One to each side of the bonfire
-    // var logGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.3, 5);
-    // var logMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-    
-    // var log1 = new THREE.Mesh(logGeometry, logMaterial);
-    // log1.position.set(-0.3, 0.5, 0);
-    // log1.rotateZ(-Math.PI/4);
-    
-    // var log2 = new THREE.Mesh(logGeometry, logMaterial);
-    // log2.position.set(0, 0.5, -0.3);
-    // log2.rotateX(Math.PI/4);
-    
-    // var log3 = new THREE.Mesh(logGeometry, logMaterial);
-    // log3.position.set(0.3, 0.5, 0);
-    // log3.rotateZ(Math.PI/4);
-    
-    // var log4 = new THREE.Mesh(logGeometry, logMaterial);
-    // log4.position.set(0, 0.5, 0.3);
-    // log4.rotateX(-Math.PI/4);
-    
     var logs = new THREE.Group();
-    // logs.add(log1);
-    // logs.add(log2);
-    // logs.add(log3);
-    // logs.add(log4);
 
-    // // Add the logs to the scene
-    // //sceneGraph.add(logs);
-
-    // Create spheres for the smoke
+    // Smoke
     var smokeGeometry = new THREE.SphereGeometry(0.1, 32, 32);
     var smokeMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
     var smoke1 = new THREE.Mesh(smokeGeometry, smokeMaterial);
@@ -359,7 +425,7 @@ function getSmoke(sceneGraph){
     smoke4.position.set(0, 2.2, 0);
     smoke5.position.set(0, 2.2, 0);
 
-    // Add the smoke to the logs
+    // Add the smoke to the fire
     logs.add(smoke1);
     logs.add(smoke2);
     logs.add(smoke3);
@@ -507,9 +573,9 @@ function getRectangularMountains(sceneGraph,side){
         }
     }
 
-    let snowMesh = hexMesh(snowGeo, snow_texture);
-    let dirtMesh = hexMesh(dirtGeo, rock_texture);
-    let grassMesh = hexMesh(grassGeo, grass_texture);
+    let snowMesh = hexMesh(snowGeo, snow_texture, false);
+    let dirtMesh = hexMesh(dirtGeo, rock_texture, true);
+    let grassMesh = hexMesh(grassGeo, grass_texture, false);
     if (side == 1){
         let translation = new THREE.Matrix4().makeTranslation(-50, 0, -50);
         snowMesh.applyMatrix4(translation);
@@ -550,11 +616,19 @@ function tileToPosition(tileX,tileY){
     return new THREE.Vector2((tileX + (tileY % 2) * 0.5) * 1.77,tileY * 1.535);
 }
 
-function hexMesh(geo, texture){
-    let mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
-            map: texture
-            //emissive: new THREE.Color(0.05, 0.05, 0.05)}));
+function hexMesh(geo, texture, isRock){
+    // if rock texture
+    let mesh;
+    if(isRock){
+        mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+            map: texture,
+            color: 0xcccccc
         }));
+    }else{
+        mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+            map: texture,
+        }));
+    }
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     return mesh;
@@ -590,16 +664,6 @@ function createCloud(position){
 
 
     return cloud;
-}
-
-function isTooClose(position, otherPositions){
-    for (let i = 0; i < otherPositions.length; i++) {
-        let distance = position.clone().setY(0).distanceTo(otherPositions[i].clone().setY(0));
-        if(distance < 7.5){
-            return true;
-        }
-    }
-    return false;
 }
 
 function loadEagle(sceneGraph, position){
@@ -671,6 +735,23 @@ function computeFrame(time) {
     }else if (keyW && character.position.z > -48) {
         character.position.z -= dispZ;
     }
+
+    // only accept input for every 2 seconds
+    let lastTime = 0;
+    if (keyN && time - lastTime > 2000) {
+        isDay = false;
+        helper.setupNightTime(sceneElements);
+        // show stars
+        const starField = sceneElements.sceneGraph.getObjectByName("starField");
+        starField.visible = true;
+    }
+    if (keyB && time - lastTime > 2000) {
+        isDay = true;
+        helper.setupDayTime(sceneElements);
+        // hide stars
+        const starField = sceneElements.sceneGraph.getObjectByName("starField");
+        starField.visible = false;
+    }   
 
     var smoke1 = sceneElements.sceneGraph.getObjectByName("smoke1");
     // make smoke1 go up
@@ -793,15 +874,24 @@ function computeFrame(time) {
         smoke5.scale.y = 1;
     }
 
+    var sun = sceneElements.sceneGraph.getObjectByName("sun");
+    var moon = sceneElements.sceneGraph.getObjectByName("moon");
     var cloud1 = sceneElements.sceneGraph.getObjectByName("cloud1");
     var cloud2 = sceneElements.sceneGraph.getObjectByName("cloud2");
     var cloud3 = sceneElements.sceneGraph.getObjectByName("cloud3");
     var cloud4 = sceneElements.sceneGraph.getObjectByName("cloud4");
     var cloud5 = sceneElements.sceneGraph.getObjectByName("cloud5");
-
-    // if is night scale down until 0
+    // DAY and NIGHT animations
     if (!isDay){
-        if (cloud1.scale.x > 0 && cloud2.scale.x && cloud3.scale.x && cloud4.scale.x && cloud5.scale.x) {
+        if (sun.scale.x > 0 && moon.scale.x < 1) {
+            sun.scale.x -= 0.004;
+            sun.scale.y -= 0.004;
+            sun.scale.z -= 0.004;
+            moon.scale.x += 0.004;
+            moon.scale.y += 0.004;
+            moon.scale.z += 0.004;
+        }
+        if(cloud1.scale.x > 0){
             cloud1.scale.x -= 0.004;
             cloud1.scale.y -= 0.004;
             cloud1.scale.z -= 0.004;
@@ -823,6 +913,15 @@ function computeFrame(time) {
             cloud5.scale.z -= 0.004;
         }
     }else{
+        if (sun.scale.x < 1 && moon.scale.x > 0) {
+            sun.scale.x += 0.004;
+            sun.scale.y += 0.004;
+            sun.scale.z += 0.004;
+            moon.scale.x -= 0.004;
+            moon.scale.y -= 0.004;
+            moon.scale.z -= 0.004;
+        }
+
         if (cloud1.scale.x < 1) {
             cloud1.scale.x += 0.004;
             cloud1.scale.y += 0.004;
@@ -884,6 +983,7 @@ function computeFrame(time) {
         eagle.position.z = - 20 * Math.sin(0.0002 * time);
         eagle.rotation.y = - 0.0002 * time;
     }
+
     // Rendering
     helper.render(sceneElements);
 

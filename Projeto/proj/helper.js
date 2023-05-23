@@ -12,17 +12,47 @@ const helper = {
         // ************************** //
         sceneElements.sceneGraph = new THREE.Scene();
 
+        // ************************** //
+        // Illumination
+        // ************************** //
+        // Set up day lights
+        const ambientLightDay = new THREE.AmbientLight('rgb(255, 255, 255)', 0.1);
+        ambientLightDay.name = "daylight1";
+        sceneElements.sceneGraph.add(ambientLightDay);
+
+        const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 0.7);
+        // (-100, 60, -20)
+        spotLight.position.set(-100,60,-20);
+        spotLight.name = "daylight2";
+        sceneElements.sceneGraph.add(spotLight);
+        spotLight.castShadow = true;
+        spotLight.shadow.mapSize.width = 2048;
+        spotLight.shadow.mapSize.height = 2048;
+
+        // Set up night lights
+        const ambientLightNight = new THREE.AmbientLight('rgb(10, 10, 50)', 0.5);
+        ambientLightNight.name = "nightlight1";
+        sceneElements.sceneGraph.add(ambientLightNight);
+        ambientLightNight.visible = false;
+
+        const spotLightNight = new THREE.SpotLight('rgb(255, 255, 255)', 0.06);
+        spotLightNight.position.set(0, 100, 0);
+        spotLightNight.name = "nightlight2";
+        sceneElements.sceneGraph.add(spotLightNight);
+        spotLightNight.visible = false;
+
+        const fireLight = new THREE.PointLight(0xff6600, 3, 10, 3);
+        fireLight.position.set(23.45, 5, 13);
+        sceneElements.sceneGraph.add(fireLight);
 
         // ************************** //
         // Add camera
         // ************************** //
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+        const camera = new THREE.PerspectiveCamera(50, width / height, 0.5, 2000);
         sceneElements.camera = camera;
-        camera.position.set(130, 40, 50);
-        camera.lookAt(0, 0, 0);
-
+        camera.position.set(130, 30, 50);
 
         // *********************************** //
         // Create renderer (with shadow map)
@@ -30,7 +60,7 @@ const helper = {
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         sceneElements.renderer = renderer;
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setClearColor('rgb(255, 255, 150)', 1.0);
+        //renderer.setClearColor('rgb(255, 255, 150)', 1.0);
         renderer.setSize(width, height);
 
         // Setup shadowMap property
@@ -44,37 +74,6 @@ const helper = {
         sceneElements.control = new OrbitControls(camera, sceneElements.renderer.domElement);
         sceneElements.control.screenSpacePanning = true;
 
-        // ************************** //
-        // Illumination
-        // ************************** //
-
-        // create both day 
-
-        // ************************** //
-        // Add ambient light
-        // ************************** //
-        // const ambientLight = new THREE.AmbientLight('rgb(255, 255, 255)', 0.2);
-        // sceneElements.sceneGraph.add(ambientLight);
-
-        //***************************** //
-        //Add spotlight (with shadows)
-        //***************************** //
-        // const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 0.8);
-        // spotLight.position.set(130,50,0);
-        // sceneElements.sceneGraph.add(spotLight);
-
-        //Setup shadow properties for the spotlight
-        // spotLight.castShadow = true;
-        // spotLight.shadow.mapSize.width = 2048;
-        // spotLight.shadow.mapSize.height = 2048;
-
-        // // Give a name to the spot light
-        // spotLight.name = "light";
-
-        const fireLight = new THREE.PointLight(0xff6600, 3, 10, 3);
-        fireLight.position.set(23.45, 5, 13);
-        sceneElements.sceneGraph.add(fireLight);
-
         // **************************************** //
         // Add the rendered image in the HTML DOM
         // **************************************** //
@@ -83,57 +82,35 @@ const helper = {
     },
 
     setupDayTime: function (sceneElements) {
-        // remove night light
+        // hide night light
         const nightLight1 = sceneElements.sceneGraph.getObjectByName("nightlight1");
-        sceneElements.sceneGraph.remove(nightLight1);
+        nightLight1.visible = false;
         const nightLight2 = sceneElements.sceneGraph.getObjectByName("nightlight2");
-        sceneElements.sceneGraph.remove(nightLight2);
+        nightLight2.visible = false;
 
-        // Set up day sky color
+        // show day light
+        const dayLight1 = sceneElements.sceneGraph.getObjectByName("daylight1");
+        dayLight1.visible = true;
+        const dayLight2 = sceneElements.sceneGraph.getObjectByName("daylight2");
+        dayLight2.visible = true;
+
         sceneElements.sceneGraph.background = new THREE.Color(0x3D85C6);
-
-        // Set up day lights
-        const ambientLightDay = new THREE.AmbientLight('rgb(255, 255, 255)', 0.1);
-        ambientLightDay.name = "daylight1";
-        sceneElements.sceneGraph.add(ambientLightDay);
-
-
-        const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 0.7);
-        spotLight.position.set(130,50,0);
-        spotLight.name = "daylight2";
-        sceneElements.sceneGraph.add(spotLight);
-
-
-        // Setup shadow properties for the spotlight
-        spotLight.castShadow = true;
-        spotLight.shadow.mapSize.width = 2048;
-        spotLight.shadow.mapSize.height = 2048;
-
-        // const directionalLightDay = new THREE.DirectionalLight('rgb(255, 255, 255)', 0.8);
-        // directionalLightDay.position.set(100, 50, -100);
-        // sceneElements.sceneGraph.add(directionalLightDay);
     },
 
     setupNightTime: function (sceneElements) {
-        // remove day light
+        // hide day light
         const dayLight1 = sceneElements.sceneGraph.getObjectByName("daylight1");
-        sceneElements.sceneGraph.remove(dayLight1);
+        dayLight1.visible = false;
         const dayLight2 = sceneElements.sceneGraph.getObjectByName("daylight2");
-        sceneElements.sceneGraph.remove(dayLight2);
+        dayLight2.visible = false;
 
-        // Set up night sky color
+        // show night light
+        const nightLight1 = sceneElements.sceneGraph.getObjectByName("nightlight1");
+        nightLight1.visible = true;
+        const nightLight2 = sceneElements.sceneGraph.getObjectByName("nightlight2");
+        nightLight2.visible = true;
+
         sceneElements.sceneGraph.background = new THREE.Color(0x000033);
-
-        // Set up night lights
-        const ambientLightNight = new THREE.AmbientLight('rgb(10, 10, 50)', 0.5);
-        ambientLightNight.name = "nightlight1";
-        sceneElements.sceneGraph.add(ambientLightNight);
-
-        const spotLightNight = new THREE.SpotLight('rgb(255, 255, 255)', 0.06);
-        //spotLightNight.position.set(-50, 100, 20);
-        spotLightNight.position.set(0, 100, 0);
-        spotLightNight.name = "nightlight2";
-        sceneElements.sceneGraph.add(spotLightNight);
     },
 
     render: function render(sceneElements) {
