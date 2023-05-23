@@ -31,6 +31,7 @@ const params = {
 };
 
 helper.initEmptyScene(sceneElements);
+helper.setupDayTime(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
 
@@ -165,14 +166,6 @@ function load3DObjects(sceneGraph) {
         sceneGraph.add(tree);
     }
 
-    //getRoundMountains(sceneGraph, new THREE.Vector2(0,0));
-
-    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 1);
-    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 2);
-    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 3);
-    // getSideMountains(sceneGraph, new THREE.Vector2(-28,-32), 4);
-
-    //getRectangularMountains(sceneGraph, 1);
     getRectangularMountains(sceneGraph, 1);
     getRectangularMountains(sceneGraph, 2);
 
@@ -209,19 +202,61 @@ function load3DObjects(sceneGraph) {
     loadCampfire(sceneGraph, new THREE.Vector2(23.45,13));
     getSmoke(sceneGraph);
 
+    loadEagle(sceneGraph, new THREE.Vector2(0,0));
+
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
+
+    const gui = new GUI();
+    
+    const controls = {
+        'x': 0,
+        'y': 0,
+        'z': 0,
+        'rotation': 0,
+        'change': () => {
+            character.position.x = controls.x;
+            character.position.y = controls.y;
+            character.position.z = controls.z;
+            character.rotation.y = controls.rotation;
+        },
+        // switch between day and night
+        'day': true,
+        'change': () => {
+            if (controls.day){
+                helper.setupDayTime(sceneElements);
+        //         sceneGraph.getObjectByName("sun").visible = true;
+        //         sceneGraph.getObjectByName("moon").visible = false;
+            }else{
+                helper.setupNightTime(sceneElements);
+            }
+        },
+    };
+    gui.add(controls, 'x', -50, 50).onChange(controls.change);
+    gui.add(controls, 'y', 0, 50).onChange(controls.change);
+    gui.add(controls, 'z', -50, 50).onChange(controls.change);
+    gui.add(controls, 'rotation', 0, 2*Math.PI).onChange(controls.change);
+    gui.add(controls, 'day', true, false).onChange(controls.change);
+
 }
 
 function getCharacter(){
     const body = new THREE.BoxGeometry(1, 1, 1);
-    const bodyMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)' });
+    const bodyMaterial = new THREE.MeshPhongMaterial({
+        color: 'rgb(0,0,255)',
+        shininess: 50,
+        specular: 0xaaaaaa
+    });
     const bodyObject = new THREE.Mesh(body, bodyMaterial);
     bodyObject.position.set(0,0.5,0);
     bodyObject.castShadow = true;
     bodyObject.receiveShadow = true;
 
     const head = new THREE.SphereGeometry(0.5, 32, 18);
-    const headMaterial = new THREE.MeshPhongMaterial({ color: 'rgb(0,0,255)' });
+    const headMaterial = new THREE.MeshPhongMaterial({
+        color: 'rgb(0,0,255)',
+        shininess: 50,
+        specular: 0xaaaaaa
+    });
     const headObject = new THREE.Mesh(head, headMaterial);
     headObject.position.set(0,1.5,0);
     headObject.castShadow = true;
@@ -449,72 +484,6 @@ function getGround(sceneGraph) {
     sceneGraph.add(grassMesh);
 }
 
-function getSideMountains(sceneGraph, positionToGo, side){
-    const snow_texture = new THREE.TextureLoader().load( "./textures/snow.jpg" );
-    snow_texture.wrapS = THREE.RepeatWrapping;
-    snow_texture.wrapT = THREE.RepeatWrapping;
-    snow_texture.repeat.set( 7, 7 );
-    const rock_texture = new THREE.TextureLoader().load( "./textures/rock.jpg" );
-    rock_texture.wrapS = THREE.RepeatWrapping;
-    rock_texture.wrapT = THREE.RepeatWrapping;
-    rock_texture.repeat.set( 6, 6 );
-    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
-    grass_texture.wrapS = THREE.RepeatWrapping;
-    grass_texture.wrapT = THREE.RepeatWrapping;
-    grass_texture.repeat.set( 1, 1 );
-
-    const simplex = new SimplexNoise();
-    const MAX_HEIGHT = 10;
-
-    for (let i = 0; i < 15; i++) {
-        for (let j = 0; j < 15; j++) {
-            // posição da montanha
-            let position = tileToPosition(i + positionToGo.x, j + positionToGo.y);
-            let distanceFromMountainCenter = Math.abs(i) + Math.abs(j);
-            let height = 0;
-            let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-            noise = Math.pow(noise, 1.5);
-            if(distanceFromMountainCenter < 14){
-                height = noise * MAX_HEIGHT;
-            }else if(distanceFromMountainCenter > 18){
-                continue;
-            }else if(distanceFromMountainCenter > 17){
-                height = noise * MAX_HEIGHT/7;
-            }else if(distanceFromMountainCenter > 16){
-                height = noise * MAX_HEIGHT/3;
-            }else if(distanceFromMountainCenter > 14){
-                height = noise * MAX_HEIGHT/1.5;
-            }else if(distanceFromMountainCenter > 12){
-                height = noise * MAX_HEIGHT;
-            } 
-            makeHex(height,position, distanceFromMountainCenter);
-        }
-    }
-    // rotate mountain
-    // when doing rotations, mesh is duplicated, idk why
-    if(side == 2){
-        let rotation = new THREE.Matrix4().makeRotationY(Math.PI/2);
-        snowGeo.applyMatrix4(rotation);
-        dirtGeo.applyMatrix4(rotation);
-        grassGeo.applyMatrix4(rotation);
-    }else if(side == 3){
-        let rotation = new THREE.Matrix4().makeRotationY(Math.PI);
-        snowGeo.applyMatrix4(rotation);
-        dirtGeo.applyMatrix4(rotation);
-        grassGeo.applyMatrix4(rotation);
-    }else if(side == 4){
-        let rotation = new THREE.Matrix4().makeRotationY(Math.PI*3/2);
-        snowGeo.applyMatrix4(rotation);
-        dirtGeo.applyMatrix4(rotation);
-        grassGeo.applyMatrix4(rotation);
-    }
-
-    let snowMesh = hexMesh(snowGeo, snow_texture);
-    let dirtMesh = hexMesh(dirtGeo, rock_texture);
-    let grassMesh = hexMesh(grassGeo, grass_texture);
-    sceneGraph.add(snowMesh, dirtMesh, grassMesh);
-}
-
 function getRectangularMountains(sceneGraph,side){
     const snow_texture = new THREE.TextureLoader().load( "./textures/snow.jpg" );
     snow_texture.wrapS = THREE.RepeatWrapping;
@@ -528,6 +497,9 @@ function getRectangularMountains(sceneGraph,side){
     grass_texture.wrapS = THREE.RepeatWrapping;
     grass_texture.wrapT = THREE.RepeatWrapping;
     grass_texture.repeat.set( 1, 1 );
+    // const snowColor = 0xffffff; 
+    // const rockColor = 0x888888; 
+    // const grassColor = 0x68A156; 
 
     const simplex = new SimplexNoise();
     const MAX_HEIGHT = 10;
@@ -578,68 +550,10 @@ function getRectangularMountains(sceneGraph,side){
     sceneGraph.add(snowMesh, dirtMesh, grassMesh);
 }
 
-
-function getRoundMountains(sceneGraph, positionToGo){
-    const snow_texture = new THREE.TextureLoader().load( "./textures/snow.jpg" );
-    snow_texture.wrapS = THREE.RepeatWrapping;
-    snow_texture.wrapT = THREE.RepeatWrapping;
-    snow_texture.repeat.set( 7, 7 );
-    const rock_texture = new THREE.TextureLoader().load( "./textures/rock.jpg" );
-    rock_texture.wrapS = THREE.RepeatWrapping;
-    rock_texture.wrapT = THREE.RepeatWrapping;
-    rock_texture.repeat.set( 6, 6 );
-    const grass_texture = new THREE.TextureLoader().load( "./textures/grass.jpg" );
-    grass_texture.wrapS = THREE.RepeatWrapping;
-    grass_texture.wrapT = THREE.RepeatWrapping;
-    grass_texture.repeat.set( 1, 1 );
-
-    const simplex = new SimplexNoise();
-    const MAX_HEIGHT = 9;
-
-    for(let i = -15 ; i <= 15 ; i++){
-        for(let j = -15 ; j <= 15 ; j++){
-            // posição da montanha
-            let position = tileToPosition(i + positionToGo.x, j + positionToGo.y);
-            let distanceFromMountainCenter = position.clone().sub(positionToGo).length();
-            let height = 0;
-            let noise = (simplex.noise(i * 0.1, j * 0.1) + 1) + 0.5;
-            noise = Math.pow(noise, 1.5);
-            if(distanceFromMountainCenter < 12){
-                height = noise * MAX_HEIGHT;
-            }else if(distanceFromMountainCenter > 18){
-                continue;
-            }else if(distanceFromMountainCenter > 17){
-                height = noise * MAX_HEIGHT/7;
-            }else if(distanceFromMountainCenter > 16){
-                height = noise * MAX_HEIGHT/3;
-            }else if(distanceFromMountainCenter > 12){
-                height = noise * MAX_HEIGHT/1.5;}
-            makeHex(height, position, distanceFromMountainCenter);
-        }
-    }
-
-    let snowMesh = hexMesh(snowGeo, snow_texture);
-    let dirtMesh = hexMesh(dirtGeo, rock_texture);
-    let grassMesh = hexMesh(grassGeo, grass_texture);
-    sceneGraph.add(snowMesh, dirtMesh, grassMesh);
-}
-
 function hexGeometry(height,position){
     let cylinderGeometry = new THREE.CylinderGeometry(1, 1, height, 6, 1, false);
     cylinderGeometry.translate(position.x, height*0.5, position.y);
     return cylinderGeometry;
-}
-
-function makeHex(height,position,distanceFromMountainCenter){
-    let geo = hexGeometry(height,position);
-
-    if(height > 22 && distanceFromMountainCenter < 13){
-        snowGeo = mergeGeometries([geo, snowGeo]);
-    }else if(height > 3 && distanceFromMountainCenter < 17){
-        dirtGeo = mergeGeometries([geo, dirtGeo]);
-    }else{
-        grassGeo = mergeGeometries([geo, grassGeo]);
-    }
 }
 
 function makeHexRec(height,position,distanceFromMountainCenter){
@@ -660,9 +574,9 @@ function tileToPosition(tileX,tileY){
 
 function hexMesh(geo, texture){
     let mesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
-            color: 'rgb(255,255,255)',
-            map: texture,
-            emissive: new THREE.Color(0.05, 0.05, 0.05)}));
+            map: texture
+            //emissive: new THREE.Color(0.05, 0.05, 0.05)}));
+        }));
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     return mesh;
@@ -706,13 +620,33 @@ function isTooClose(position, otherPositions){
     return false;
 }
 
+function loadEagle(sceneGraph, position){
+    let loader = new GLTFLoader();
+    loader.load('./Projeto/proj/models/Eagle.glb', (gltf) => {
+        let eagle = gltf.scene;
+        eagle.traverse(child => {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        });
+        eagle.scale.set(0.02,0.02,0.02);
+        eagle.position.set(position.x, 25, position.y);
+        eagle.rotateOnAxis(new THREE.Vector3(0,1,0), -Math.PI/2);
+        eagle.name = "eagle";
+        sceneGraph.add(eagle);
+    });
+}
+
 function loadCampfire(sceneGraph, position){
     let loader = new GLTFLoader();
     loader.load('./Projeto/proj/models/Campfire.glb', (gltf) => {
         let campfire = gltf.scene;
-        campfire.traverse(child => {
-            child.castShadow = true;
-            child.receiveShadow = true;
+        const emissiveColor = 0xff6600;
+        const emissiveIntensity = 0.02;
+        campfire.traverse((child) => {
+            if (child.isMesh) {
+                child.material.emissive = new THREE.Color(emissiveColor);
+                child.material.emissiveIntensity = emissiveIntensity;
+            }
         });
         campfire.scale.set(1.5,1.5,1.5);
         campfire.position.set(position.x, 0.7, position.y);
@@ -917,6 +851,13 @@ function computeFrame(time) {
         cloud5.position.x = -25;
     }
 
+    // make the eagle fly in a circle
+    var eagle = sceneElements.sceneGraph.getObjectByName("eagle");
+    if (eagle) {
+        eagle.position.x = - 35 * Math.cos(0.0002 * time);
+        eagle.position.z = - 20 * Math.sin(0.0002 * time);
+        eagle.rotation.y = - 0.0002 * time;
+    }
     // Rendering
     helper.render(sceneElements);
 
