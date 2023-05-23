@@ -31,6 +31,9 @@ const params = {
 };
 
 let isDay = true;
+let lastCPressTime = 0; // Variable to store the timestamp of the last 'C' key press
+const CPressDelay = 200; // Delay in milliseconds
+let isCameraChanged = false;
 helper.initEmptyScene(sceneElements);
 helper.setupDayTime(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
@@ -78,7 +81,7 @@ function onDocumentKeyDown(event) {
         case 66: //b
             keyB = true;
             break;
-        case 67: //c
+        case 67:
             keyC = true;
             break;
     }
@@ -211,51 +214,7 @@ function load3DObjects(sceneGraph) {
 
     getSun(sceneGraph, new THREE.Vector3(-100, 60, -20));
     getMoon(sceneGraph, new THREE.Vector3(-100, 60, -20));
-
-    // const gui = new GUI();
-
-    // const controls = {
-    //     'day': true,
-    //     'change': () => {
-    //         if (controls.day){
-    //             isDay = true;
-    //             helper.setupDayTime(sceneElements);
-    //             // remove stars
-    //             sceneGraph.remove(sceneGraph.getObjectByName("starField"));     
-    //         }else{
-    //             isDay = false;
-    //             helper.setupNightTime(sceneElements);
-    //             // add stars
-    //             const starsGeometry = new THREE.BufferGeometry();
-    //             const starsPosition = [];
-
-    //             for (let i = 0; i < 10000; i++) {
-    //                 const star = new THREE.Vector3();
-    //                 star.x = getRandomPosition(-1000, 1000);
-    //                 star.y = getRandomPosition(-1000, 1000);
-    //                 star.z = getRandomPosition(-1000, 1000);
-                  
-    //                 if (
-    //                     star.x < -60 || star.x > 60 ||
-    //                     star.y < -10 || star.y > 70 ||
-    //                     star.z < -60 || star.z > 60
-    //                   ) {
-    //                     starsPosition.push(star.x, star.y, star.z);
-    //                   }
-                    
-    //               }
-                  
-    //               starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsPosition, 3));
-    //               const starsMaterial = new THREE.PointsMaterial({ color: 0x888888 });
-    //               const starField = new THREE.Points(starsGeometry, starsMaterial);
-    //               starField.name = "starField";
-    //               sceneGraph.add(starField);
-    //         }
-    //     },
-    // };
-
-    // const dayNightFolder = gui.addFolder("Options");
-    // dayNightFolder.add(controls, "day").name("Toggle Day").onChange(controls.change);
+    
     
     // add stars
     const starsGeometry = new THREE.BufferGeometry();
@@ -736,16 +695,40 @@ function computeFrame(time) {
         character.position.z -= dispZ;
     }
 
-    // only accept input for every 2 seconds
-    let lastTime = 0;
-    if (keyN && time - lastTime > 2000) {
+    // only accept keyC every 100ms
+
+    if (keyC) {
+        const currentTime = new Date().getTime(); // Get the current timestamp
+    
+        // Check if the required time has passed since the last 'C' key press
+        if (currentTime - lastCPressTime > CPressDelay) {
+            isCameraChanged = !isCameraChanged; // Toggle camera state
+    
+            if (isCameraChanged) { // If the camera is changed
+                sceneElements.camera.position.copy(character.position); // Set the camera to the character's position
+                sceneElements.camera.position.y += 25; // Offset the camera's height
+            } else { // If the camera is in normal mode
+                sceneElements.camera.position.set(130, 30, 50); // Set the camera to its initial position
+            }
+    
+            lastCPressTime = currentTime; // Update the last 'C' key press timestamp
+        }
+    }
+    
+    if (isCameraChanged) { // If the camera is changed
+        sceneElements.camera.lookAt(character.position);
+    } else { // If the camera is in normal mode
+        sceneElements.camera.lookAt(new THREE.Vector3()); // Look at the center of the scene
+    }
+
+    if (keyN) {
         isDay = false;
         helper.setupNightTime(sceneElements);
         // show stars
         const starField = sceneElements.sceneGraph.getObjectByName("starField");
         starField.visible = true;
     }
-    if (keyB && time - lastTime > 2000) {
+    if (keyB) {
         isDay = true;
         helper.setupDayTime(sceneElements);
         // hide stars
