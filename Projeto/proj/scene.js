@@ -31,9 +31,9 @@ const params = {
 };
 
 let isDay = true;
-let lastCPressTime = 0; // Variable to store the timestamp of the last 'C' key press
-const CPressDelay = 200; // Delay in milliseconds
-let isCameraChanged = false;
+// let lastCPressTime = 0; // Variable to store the timestamp of the last 'C' key press
+// const CPressDelay = 200; // Delay in milliseconds
+// let isCameraChanged = false;
 helper.initEmptyScene(sceneElements);
 helper.setupDayTime(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
@@ -211,6 +211,8 @@ function load3DObjects(sceneGraph) {
     loadEagle(sceneGraph, new THREE.Vector2(0,0));
 
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
+
+    loadBridge(sceneGraph, new THREE.Vector2(0,0));
 
     loadCrystal(sceneGraph, new THREE.Vector2(-15,15), 1);
     loadCrystal(sceneGraph, new THREE.Vector2(-35,18), 2);
@@ -687,6 +689,23 @@ function loadHouse(sceneGraph, position){
     });
 }
 
+function loadBridge(sceneGraph, position){
+    let loader = new GLTFLoader();
+    loader.load('./Projeto/proj/models/Bridge.glb', (gltf) => {
+        let bridge = gltf.scene;
+        bridge.traverse(child => {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        });
+        bridge.scale.set(3.5,1.5,2);
+        bridge.position.set(position.x, 0, position.y);
+        // rotate
+        bridge.rotateOnAxis(new THREE.Vector3(0,1,0), Math.PI/2)
+        bridge.name = 'bridge';
+        sceneGraph.add(bridge);
+    });
+}
+
 function loadCrystal(sceneGraph, position, crystalType) {
     let loader = new GLTFLoader();
     let crystalModelPath = '';
@@ -742,29 +761,29 @@ function computeFrame(time) {
 
     // only accept keyC every 100ms
 
-    if (keyC) {
-        const currentTime = new Date().getTime(); // Get the current timestamp
+    // if (keyC) {
+    //     const currentTime = new Date().getTime(); // Get the current timestamp
     
-        // Check if the required time has passed since the last 'C' key press
-        if (currentTime - lastCPressTime > CPressDelay) {
-            isCameraChanged = !isCameraChanged; // Toggle camera state
+    //     // Check if the required time has passed since the last 'C' key press
+    //     if (currentTime - lastCPressTime > CPressDelay) {
+    //         isCameraChanged = !isCameraChanged; // Toggle camera state
     
-            if (isCameraChanged) { // If the camera is changed
-                sceneElements.camera.position.copy(character.position); // Set the camera to the character's position
-                sceneElements.camera.position.y += 25; // Offset the camera's height
-            } else { // If the camera is in normal mode
-                sceneElements.camera.position.set(130, 30, 50); // Set the camera to its initial position
-            }
+    //         if (isCameraChanged) { // If the camera is changed
+    //             sceneElements.camera.position.copy(character.position); // Set the camera to the character's position
+    //             sceneElements.camera.position.y += 25; // Offset the camera's height
+    //         } else { // If the camera is in normal mode
+    //             sceneElements.camera.position.set(130, 30, 50); // Set the camera to its initial position
+    //         }
     
-            lastCPressTime = currentTime; // Update the last 'C' key press timestamp
-        }
-    }
+    //         lastCPressTime = currentTime; // Update the last 'C' key press timestamp
+    //     }
+    // }
     
-    if (isCameraChanged) { // If the camera is changed
-        sceneElements.camera.lookAt(character.position);
-    } else { // If the camera is in normal mode
-        sceneElements.camera.lookAt(new THREE.Vector3()); // Look at the center of the scene
-    }
+    // if (isCameraChanged) { // If the camera is changed
+    //     sceneElements.camera.lookAt(character.position);
+    // } else { // If the camera is in normal mode
+    //     sceneElements.camera.lookAt(new THREE.Vector3()); // Look at the center of the scene
+    // }
 
     if (keyN) {
         isDay = false;
