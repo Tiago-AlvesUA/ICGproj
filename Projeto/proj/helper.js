@@ -44,6 +44,45 @@ const helper = {
         const fireLight = new THREE.PointLight(0xff6600, 3, 10, 3);
         fireLight.position.set(23.45, 5, 13);
         sceneElements.sceneGraph.add(fireLight);
+        fireLight.castShadow = true;
+
+        const crystalLight2 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight2.position.set(-35, 5, 18);
+        sceneElements.sceneGraph.add(crystalLight2);
+        crystalLight2.castShadow = true;
+        const crystalLight1 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight1.position.set(-15, 5, 15);
+        sceneElements.sceneGraph.add(crystalLight1);
+        crystalLight1.castShadow = true;
+        const crystalLight3 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight3.position.set(5, 5, 20);
+        sceneElements.sceneGraph.add(crystalLight3);
+        crystalLight3.castShadow = true;
+        const crystalLight4 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight4.position.set(40, 5, 15);
+        sceneElements.sceneGraph.add(crystalLight4);
+        crystalLight4.castShadow = true;
+        const crystalLight5 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight5.position.set(30, 5, -16);
+        sceneElements.sceneGraph.add(crystalLight5);
+        crystalLight5.castShadow = true;
+        const crystalLight6 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight6.position.set(-30, 5, -13);
+        sceneElements.sceneGraph.add(crystalLight6);
+        crystalLight6.castShadow = true;
+        const crystalLight7 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight7.position.set(-40, 5, -20);
+        sceneElements.sceneGraph.add(crystalLight7);
+        crystalLight7.castShadow = true;
+        const crystalLight8 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight8.position.set(45, 5, -21);
+        sceneElements.sceneGraph.add(crystalLight8);
+        crystalLight8.castShadow = true;
+        const crystalLight9 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight9.position.set(0, 5, -20);
+        sceneElements.sceneGraph.add(crystalLight9);
+        crystalLight9.castShadow = true;
+        
 
         // ************************** //
         // Add camera

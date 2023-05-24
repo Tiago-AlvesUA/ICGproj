@@ -212,6 +212,16 @@ function load3DObjects(sceneGraph) {
 
     loadHouse(sceneGraph, new THREE.Vector2(-25,-20));
 
+    loadCrystal(sceneGraph, new THREE.Vector2(-15,15), 1);
+    loadCrystal(sceneGraph, new THREE.Vector2(-35,18), 2);
+    loadCrystal(sceneGraph, new THREE.Vector2(5,20), 3);
+    loadCrystal(sceneGraph, new THREE.Vector2(40,15), 2);
+    loadCrystal(sceneGraph, new THREE.Vector2(30,-16), 2);
+    loadCrystal(sceneGraph, new THREE.Vector2(-30,-13), 3);
+    loadCrystal(sceneGraph, new THREE.Vector2(-40,-20), 1);
+    loadCrystal(sceneGraph, new THREE.Vector2(45,-21), 2);
+    loadCrystal(sceneGraph, new THREE.Vector2(0,-20), 2);
+
     getSun(sceneGraph, new THREE.Vector3(-100, 60, -20));
     getMoon(sceneGraph, new THREE.Vector3(-100, 60, -20));
     
@@ -677,6 +687,41 @@ function loadHouse(sceneGraph, position){
     });
 }
 
+function loadCrystal(sceneGraph, position, crystalType) {
+    let loader = new GLTFLoader();
+    let crystalModelPath = '';
+  
+    switch (crystalType) {
+        case 1:
+            crystalModelPath = './Projeto/proj/models/crystal_1.glb';
+            break;
+        case 2:
+            crystalModelPath = './Projeto/proj/models/crystal_2.glb';
+            break;
+        case 3:
+            crystalModelPath = './Projeto/proj/models/crystal_3.glb';
+            break;
+        default:
+            console.error(`Invalid crystal type: ${crystalType}`);
+            return;
+    }
+  
+    loader.load(crystalModelPath, (gltf) => {
+        let crystal = gltf.scene;
+        crystal.traverse(child => {
+            if (child.isMesh) {
+                child.material.color.set(0xfffff0);
+                child.material.emissive.set(0x92CFE3);
+                child.material.emissiveIntensity = 0.25;
+            }
+        });
+  
+        crystal.scale.set(0.3, 0.3, 0.3);
+        crystal.position.set(position.x, 0, position.y);
+        crystal.name = `crystal${crystalType}`;
+        sceneGraph.add(crystal);
+    });
+}
 
 var dispX = 0.1, dispZ = 0.1;
 // Displacement values
