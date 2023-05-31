@@ -2,11 +2,9 @@
 
 import * as THREE from 'three';
 import helper from "./helper.js";
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { SimplexNoise } from 'three/addons/math/SimplexNoise.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { Water } from 'three/addons/objects/Water2.js';
 
 // To store the scene graph, and elements usefull to rendering the scene
@@ -46,7 +44,7 @@ requestAnimationFrame(computeFrame);
 window.addEventListener('resize', resizeWindow);
 
 //To keep track of the keyboard - WASD
-var keyD = false, keyA = false, keyS = false, keyW = false, keyN = false, keyB = false, keyC = false;
+var keyD = false, keyA = false, keyS = false, keyW = false, keyN = false, keyB = false, keyT = false, keyY = false, keyU = false;
 document.addEventListener('keydown', onDocumentKeyDown, false);
 document.addEventListener('keyup', onDocumentKeyUp, false);
 
@@ -81,8 +79,14 @@ function onDocumentKeyDown(event) {
         case 66: //b
             keyB = true;
             break;
-        case 67:
-            keyC = true;
+        case 84: //t
+            keyT = true; 
+            break;
+        case 89: //y
+            keyY = true;
+            break;
+        case 85: //u
+            keyU = true;
             break;
     }
 }
@@ -106,8 +110,14 @@ function onDocumentKeyUp(event) {
         case 66:
             keyB = false;
             break;
-        case 67:
-            keyC = false;
+        case 84:
+            keyT = false;
+            break;
+        case 89:
+            keyY = false;
+            break;
+        case 85:
+            keyU = false;
             break;
     }
 }
@@ -149,7 +159,7 @@ function load3DObjects(sceneGraph) {
     //planeObject2.receiveShadow = true;
 
     const character = getCharacter();
-    character.position.set(30,0,0);
+    character.position.set(30,0,-20);
     sceneGraph.add(character);
     
     // Create trees to the right of the tent
@@ -740,46 +750,39 @@ function loadCrystal(sceneGraph, position, crystalType) {
 
 var dispX = 0.1, dispZ = 0.1;
 // Displacement values
+let timePassed = 0;
+
+function isNotRiver(x, z) {
+    const rect1 = (Math.abs(x) < 49.5 && z > 10.5 && z < 24);
+    const rect2 = (Math.abs(x) < 1.5 && Math.abs(z) < 10.5);
+    const rect3 = (Math.abs(x) < 49.5 && z > -24 && z < -10.5);
+    return rect1 || rect2 || rect3;
+}
 
 function computeFrame(time) {
 
     const character = sceneElements.sceneGraph.getObjectByName("character");
 
-    if (keyD && character.position.x < 48) {
+    // Character only can move on land
+    if (keyD && isNotRiver(character.position.x + dispX, character.position.z)) {
         character.position.x += dispX;
-    }else if (keyA && character.position.x > -48) {
+    } else if (keyA && isNotRiver(character.position.x - dispX, character.position.z)) {
         character.position.x -= dispX;
-    }else if (keyS && character.position.z < 48) {
+    } else if (keyS && isNotRiver(character.position.x, character.position.z + dispZ)) {
         character.position.z += dispZ;
-    }else if (keyW && character.position.z > -48) {
+    } else if (keyW && isNotRiver(character.position.x, character.position.z - dispZ)) {
         character.position.z -= dispZ;
     }
 
-    // only accept keyC every 100ms
-
-    // if (keyC) {
-    //     const currentTime = new Date().getTime(); // Get the current timestamp
-    
-    //     // Check if the required time has passed since the last 'C' key press
-    //     if (currentTime - lastCPressTime > CPressDelay) {
-    //         isCameraChanged = !isCameraChanged; // Toggle camera state
-    
-    //         if (isCameraChanged) { // If the camera is changed
-    //             sceneElements.camera.position.copy(character.position); // Set the camera to the character's position
-    //             sceneElements.camera.position.y += 25; // Offset the camera's height
-    //         } else { // If the camera is in normal mode
-    //             sceneElements.camera.position.set(130, 30, 50); // Set the camera to its initial position
-    //         }
-    
-    //         lastCPressTime = currentTime; // Update the last 'C' key press timestamp
-    //     }
-    // }
-    
-    // if (isCameraChanged) { // If the camera is changed
-    //     sceneElements.camera.lookAt(character.position);
-    // } else { // If the camera is in normal mode
-    //     sceneElements.camera.lookAt(new THREE.Vector3()); // Look at the center of the scene
-    // }
+    if (keyT) {
+        sceneElements.camera.position.set(0, 150, 0); 
+    }
+    if (keyY) {
+        sceneElements.camera.position.set(130, 40, 50); 
+    }
+    if (keyU) {
+        sceneElements.camera.position.set(-145, 110, 50);
+    }
 
     if (keyN) {
         isDay = false;
@@ -1026,6 +1029,14 @@ function computeFrame(time) {
         eagle.position.z = - 20 * Math.sin(0.0002 * time);
         eagle.rotation.y = - 0.0002 * time;
     }
+
+    // call the randomCrystalLight function every 3 seconds
+    if (timePassed > 3) {
+        helper.randomCrystalLight(sceneElements);
+        timePassed = 0;
+    }
+
+    timePassed += 0.01;
 
     // Rendering
     helper.render(sceneElements);

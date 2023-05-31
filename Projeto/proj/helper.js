@@ -46,60 +46,78 @@ const helper = {
         sceneElements.sceneGraph.add(fireLight);
         fireLight.castShadow = true;
 
-        // const crystalLight2 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight2.position.set(-35, 5, 18);
-        // sceneElements.sceneGraph.add(crystalLight2);
-        // crystalLight2.castShadow = true;
-        // crystalLight2.shadow.mapSize.width = 25;
-        // crystalLight2.shadow.mapSize.height = 25;
-        // const crystalLight1 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight1.position.set(-15, 5, 15);
-        // sceneElements.sceneGraph.add(crystalLight1);
-        // crystalLight1.castShadow = true;
-        // crystalLight1.shadow.mapSize.width = 25;
-        // crystalLight1.shadow.mapSize.height = 25;
-        // const crystalLight3 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight3.position.set(5, 5, 20);
-        // sceneElements.sceneGraph.add(crystalLight3);
-        // crystalLight3.castShadow = true;
-        // crystalLight3.shadow.mapSize.width = 25;
-        // crystalLight3.shadow.mapSize.height = 25;
-        // const crystalLight4 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight4.position.set(40, 5, 15);
-        // sceneElements.sceneGraph.add(crystalLight4);
-        // crystalLight4.castShadow = true;
-        // crystalLight4.shadow.mapSize.width = 25;
-        // crystalLight4.shadow.mapSize.height = 25;
-        // const crystalLight5 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight5.position.set(30, 5, -16);
-        // sceneElements.sceneGraph.add(crystalLight5);
-        // crystalLight5.castShadow = true;
-        // crystalLight5.shadow.mapSize.width = 25;
-        // crystalLight5.shadow.mapSize.height = 25;
-        // const crystalLight6 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight6.position.set(-30, 5, -13);
-        // sceneElements.sceneGraph.add(crystalLight6);
-        // crystalLight6.castShadow = true;
-        // crystalLight6.shadow.mapSize.width = 25;
-        // crystalLight6.shadow.mapSize.height = 25;
-        // const crystalLight7 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight7.position.set(-40, 5, -20);
-        // sceneElements.sceneGraph.add(crystalLight7);
-        // crystalLight7.castShadow = true;
-        // crystalLight7.shadow.mapSize.width = 25;
-        // crystalLight7.shadow.mapSize.height = 25;
-        // const crystalLight8 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight8.position.set(45, 5, -21);
-        // sceneElements.sceneGraph.add(crystalLight8);
-        // crystalLight8.castShadow = true;
-        // crystalLight8.shadow.mapSize.width = 25;
-        // crystalLight8.shadow.mapSize.height = 25;
-        // const crystalLight9 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
-        // crystalLight9.position.set(0, 5, -20);
-        // sceneElements.sceneGraph.add(crystalLight9);
-        // crystalLight9.castShadow = true;
-        // crystalLight9.shadow.mapSize.width = 25;
-        // crystalLight9.shadow.mapSize.height = 25;
+        const crystalLight2 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight2.position.set(-35, 5, 18);
+        crystalLight2.visible = false;
+        sceneElements.sceneGraph.add(crystalLight2);
+        crystalLight2.castShadow = true;
+        crystalLight2.name = "crystalLight2";
+        crystalLight2.shadow.mapSize.width = 25;
+        crystalLight2.shadow.mapSize.height = 25;
+        const crystalLight1 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight1.position.set(-15, 5, 15);
+        crystalLight1.visible = false;
+        sceneElements.sceneGraph.add(crystalLight1);
+        crystalLight1.castShadow = true;
+        crystalLight1.name = "crystalLight1";
+        crystalLight1.shadow.mapSize.width = 25;
+        crystalLight1.shadow.mapSize.height = 25;
+        const crystalLight3 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight3.position.set(5, 5, 20);
+        crystalLight3.visible = false;
+        sceneElements.sceneGraph.add(crystalLight3);
+        crystalLight3.castShadow = true;
+        crystalLight3.name = "crystalLight3";
+        crystalLight3.shadow.mapSize.width = 25;
+        crystalLight3.shadow.mapSize.height = 25;
+        const crystalLight4 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight4.position.set(40, 5, 15);
+        crystalLight4.visible = false;
+        sceneElements.sceneGraph.add(crystalLight4);
+        crystalLight4.castShadow = true;
+        crystalLight4.name = "crystalLight4";
+        crystalLight4.shadow.mapSize.width = 25;
+        crystalLight4.shadow.mapSize.height = 25;
+        const crystalLight5 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight5.position.set(30, 5, -16);
+        crystalLight5.visible = false;
+        sceneElements.sceneGraph.add(crystalLight5);
+        crystalLight5.castShadow = true;
+        crystalLight5.name = "crystalLight5";
+        crystalLight5.shadow.mapSize.width = 25;
+        crystalLight5.shadow.mapSize.height = 25;
+        const crystalLight6 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight6.position.set(-30, 5, -13);
+        crystalLight6.visible = false;
+        sceneElements.sceneGraph.add(crystalLight6);
+        crystalLight6.castShadow = true;
+        crystalLight6.name = "crystalLight6";
+        crystalLight6.shadow.mapSize.width = 25;
+        crystalLight6.shadow.mapSize.height = 25;
+        const crystalLight7 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight7.position.set(-40, 5, -20);
+        crystalLight7.visible = false;
+        sceneElements.sceneGraph.add(crystalLight7);
+        crystalLight7.castShadow = true;
+        crystalLight7.name = "crystalLight7";
+        crystalLight7.shadow.mapSize.width = 25;
+        crystalLight7.shadow.mapSize.height = 25;
+        const crystalLight8 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight8.position.set(45, 5, -21);
+        crystalLight8.visible = false;
+        sceneElements.sceneGraph.add(crystalLight8);
+        crystalLight8.castShadow = true;
+        crystalLight8.name = "crystalLight8";
+        crystalLight8.shadow.mapSize.width = 25;
+        crystalLight8.shadow.mapSize.height = 25;
+        const crystalLight9 = new THREE.PointLight(0x92CFE3, 3, 10, 3);
+        crystalLight9.position.set(0, 5, -20);
+        crystalLight9.visible = false;
+        sceneElements.sceneGraph.add(crystalLight9);
+        crystalLight9.castShadow = true;
+        crystalLight9.name = "crystalLight9";
+        crystalLight9.shadow.mapSize.width = 25;
+        crystalLight9.shadow.mapSize.height = 25;
         
 
         // ************************** //
@@ -109,7 +127,7 @@ const helper = {
         const height = window.innerHeight;
         const camera = new THREE.PerspectiveCamera(50, width / height, 0.5, 2000);
         sceneElements.camera = camera;
-        camera.position.set(130, 30, 50);
+        camera.position.set(130, 40, 50);
 
         // *********************************** //
         // Create renderer (with shadow map)
@@ -170,9 +188,36 @@ const helper = {
         sceneElements.sceneGraph.background = new THREE.Color(0x000033);
     },
 
+    randomCrystalLight: function (sceneElements) {
+        const crystalLights = [
+          sceneElements.sceneGraph.getObjectByName("crystalLight1"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight2"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight3"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight4"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight5"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight6"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight7"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight8"),
+          sceneElements.sceneGraph.getObjectByName("crystalLight9"),
+        ];
+      
+        // Turn off all crystal lights
+        crystalLights.forEach((light) => {
+          light.visible = false;
+        });
+      
+        // Select a random index
+        const randomIndex = Math.floor(Math.random() * crystalLights.length);
+      
+        // Turn on the selected crystal light
+        crystalLights[randomIndex].visible = true;
+    },
+            
     render: function render(sceneElements) {
         sceneElements.renderer.render(sceneElements.sceneGraph, sceneElements.camera);
     },
+
+    
 };
 
 export default helper;
