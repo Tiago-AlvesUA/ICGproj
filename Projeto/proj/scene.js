@@ -129,20 +129,16 @@ function load3DObjects(sceneGraph) {
     sceneGraph.add(planeObject1);
 
     const planeGeometry3 = new THREE.PlaneGeometry(100, 20);
-    // const planeShape3 = new THREE.Shape();
-    // planeShape3.moveTo(-50, -10);
-    // planeShape3.lineTo(-50, 10);
-    // planeShape3.bezierCurveTo(-50, 10, -25, 5, 0, 10);
-    // planeShape3.bezierCurveTo(0, 10, 25, 15, 50, 10);
-    // planeShape3.lineTo(50, -10);
-    // planeShape3.bezierCurveTo(50, -10, 25, -5, 0, -10);
-    // planeShape3.bezierCurveTo(0, -10, -25, -15, -50, -10);
-    // const planeGeometry3 = new THREE.ShapeGeometry(planeShape3);
-
     const planeMaterial3 = new THREE.MeshPhongMaterial({ color: 'rgb(235, 255, 255)', side: THREE.DoubleSide});
     const planeObject3 = new THREE.Mesh(planeGeometry3, planeMaterial3);
     planeObject3.position.set(0, 0.001, 0);
     sceneGraph.add(planeObject3);
+
+    // place green block bellow the ground plane
+    const greenBlock = new THREE.Mesh(new THREE.BoxGeometry(100, 30, 100), new THREE.MeshPhongMaterial({ color: '#8ac27c' }));
+    greenBlock.position.set(0, -15.05, 0);
+    sceneGraph.add(greenBlock);
+
 
     // Change orientation of the plane using rotation
     planeObject1.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);

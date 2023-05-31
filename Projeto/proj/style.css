@@ -1,4 +1,39 @@
-
 body { 
-	margin: 0px;
+    margin: 0px; 
+}		
+
+::-webkit-scrollbar { display: none; }
+
+.container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
 }
+
+#info {
+    position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+/* CSS for the menu */
+.menu {
+	width: 200px;
+	padding: 10px;
+	background-color: #f0f0f0;
+	font-family: Arial, sans-serif;
+	outline: 3px solid #8ac27c;
+	}
+
+	h2 {
+	margin-top: 0;
+	}
+
+	ul {
+	list-style-type: none;
+	padding: 0;
+	}
+
+	li {
+	margin-bottom: 5px;
+	}
