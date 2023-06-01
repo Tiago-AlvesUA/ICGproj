@@ -21,13 +21,10 @@ const helper = {
         sceneElements.sceneGraph.add(ambientLightDay);
 
         const spotLight = new THREE.SpotLight('rgb(255, 255, 255)', 0.7);
-        // (-100, 60, -20)
         spotLight.position.set(-100,60,-20);
         spotLight.name = "daylight2";
         sceneElements.sceneGraph.add(spotLight);
         spotLight.castShadow = true;
-        //spotLight.shadow.mapSize.width = 2048;
-        //spotLight.shadow.mapSize.height = 2048;
 
         // Set up night lights
         const ambientLightNight = new THREE.AmbientLight('rgb(10, 10, 50)', 0.5);
